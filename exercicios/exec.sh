@@ -1,0 +1,1 @@
+g++ Tp1.cpp -o Tp1 && ./Tp1 < in.txt
