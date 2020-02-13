@@ -67,37 +67,48 @@ void Matriz::mostrarMatriz()
     }
 }//end mostrarMatriz()
 
+
+/**
+ * Método de força bruta (não tão eficiente)
+ * para encontrar a maior soma em uma matriz.
+ */
 void Matriz::procurarMaiorSoma()
 {   
-    int maiorSoma = this->matriz[0][0];
+    int maiorSoma = 0;
     int aux = maiorSoma;
 
-    // 'x' e 'y' são os pontos de partida para os for's internos
-    // com o intuito de fazê-los procurar todos os retângulos 
-    // possíveis dentro da matriz
-    
+    // 'x' e 'y' são os endereços dos pontos de partida de cada variável
+    // para a realização das iterações abaixo
     for(int x = 0; x < linhas; x++)
     {
-        // variável definida neste local para ser reinicializada ao término        
-        // da soma de um retângulo.            
         for(int y = 0; y < colunas; y++)
-        {                                                                                                                       
-            // Somar elementos do retângulo interno
-            cout << "RESET..." << endl;
-            int aux = matriz[x][y];
-            for(int z = x; z < linhas; z++)
+        {
+            // 'p' e 'q' são os limites de pulos (elemento a elemento) para 
+            // a realização da soma. Estes delimitam todos os retângulos
+            // possíveis.
+            for(int p = linhas; p > 0; p--)
             {
-                for(int w = y; w < colunas; w++)
-                {
-                    aux += this->matriz[z][w]; 
-                    cout << x << " " << y << " " << z << " " << w << " -> aux = " << aux << endl;
-                }            
-            }
-            if(aux > maiorSoma){ maiorSoma = aux; }
-                                    
-        }            
-        // Comparar soma de retângulo atual com o maior anterior                        
-    }
+                for(int q = colunas; q > 0; q--)
+                {        
+                    // 'w' e 'z' realizam a soma do retângulo delimitado por 'p' e 'q' 
+                    // partindo das coordenadas iniciais 'x' e 'y'
+                    for(int z = x; z <= linhas-p; z++)
+                    {
+                        for(int w = y; w <= colunas-q; w++)
+                        {
+                            aux += this->matriz[z][w];
+                            //cout << x << " " << y << " " << z << " " << w << " -> aux = " << aux << endl;
+                        }
+                    }
+
+                    if(aux > maiorSoma){ maiorSoma = aux; }
+                    //cout << "RESET..." << endl;
+                    aux = 0;
+
+                }//end for
+            }//end for
+        }//end for
+    }//end for
         
 
     // Mostrar resultado
