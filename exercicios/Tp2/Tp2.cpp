@@ -6,28 +6,31 @@ using namespace std;
 
 string removerEspacos(string str)
 {
-    string newstr = "";
+    string newstr = "";    
+    
     for(int x = 0; x < str.length(); x++)
     {
         if( str[x] != ' ' || (str[x] == ' ' && str[x+1] != ' '))
             newstr = newstr + str.at(x);
     }
-    
-    // cout << newstr << endl;
+
+    // Se o último caractere for um espaço em branco, remova.
+    if(newstr[newstr.length()-1] == ' '){ newstr.erase(newstr.length()-1, 1); }
+
     return newstr; 
 }
 
 void inserirEspacos(string str, int tam)
 {
     string newString = "";
-
     for( int x = 0; x < tam; x++ )
     {
-        newString = " " + newString + str[x]; // ERRO
-    }   
-    
-    cout << "LINHA: " << newString << endl;
+        newString = " " + newString; // ERRO
+        //cout << "LINHA: " << newString << endl;
+    }
+    newString += str;
 
+    cout << newString << endl;
 }
 
 void alinhar(string maiorString, string stringTotal)
@@ -37,13 +40,16 @@ void alinhar(string maiorString, string stringTotal)
 
     for( int x = 0; x < stringTotal.length(); x++) 
     {
-        if(stringTotal.at(x) != '\n' && stringTotal.at(x) != '\0' )
+        if( stringTotal.at(x) != '\n' && stringTotal.at(x) != '\0' )
             novaString = novaString + stringTotal.at(x);
         else
         {
-            cout << "LINHA: " << tamMaiorString - novaString.length() << endl;
-            inserirEspacos(novaString, (tamMaiorString - novaString.length()));
-            novaString = "";
+            if(!novaString.empty())
+            {
+                //cout << novaString << endl;
+                inserirEspacos(novaString, (tamMaiorString - novaString.length()));
+                novaString = "";
+            }
         }            
     }
 
@@ -59,7 +65,6 @@ void justificar(int linhas)
         string str = "";
         getline(cin, str);
 
-        // cout << "LINHA: " << str << endl;
 
         if(str.compare(""))
             str = removerEspacos(str);
@@ -70,9 +75,6 @@ void justificar(int linhas)
         if(str.length() > maiorString.length())
             maiorString = str;
     }
-        
-
-    //cout << maiorString << endl;
 
     alinhar(maiorString, stringTotal);
 }
