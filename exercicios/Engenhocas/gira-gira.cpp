@@ -22,7 +22,7 @@ int main()
     {
         mode.dmDisplayOrientation = DMDO_DEFAULT;
         LONG r;
-        r = ChangeDisplaySettings( & mode, 0);
+        r = ChangeDisplaySettings( & mode, 1 );
         cout << "result: " << r;
     }
 }
