@@ -62,7 +62,7 @@ void Grafo::inicializar()
     {
         for(int x = 0; x < this->vertices; x++)
             for(int y = 0; y < this->vertices; y++)
-                this->matriz[x][y] = 0;
+                this->matriz[x][y] = -1;
     }
 }//end init()
 
@@ -86,9 +86,10 @@ void Grafo::printMatriz()
  */
 void Grafo::conectarVertices(int x, int y)
 {
-    if(x < y){ matriz[x-1][y-1] = 1; }
-    else{ matriz[y-1][x-1] = 1; }
-    
+    if(x < y)
+        matriz[x-1][y-1] = (matriz[y-1][x-1] == -1)? 1:-1;
+    else
+        matriz[y-1][x-1] = (matriz[x-1][y-1] == -1)? 1:-1; 
 }//end conectarVertices()
 
 
@@ -98,16 +99,18 @@ void Grafo::conectarVertices(int x, int y)
  */
 int Grafo::buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente)
 {    
-    visitados[v] = true;
-
+    if(!visitados[v])
+    {
+        visitados[v] = true;
+        tamanhoComponente++;
+    }
     for (size_t y = 0; y < this->vertices; y++)
     {
         if(!visitados[y] && this->matriz[v][y] == 1) 
         {
-            tamanhoComponente = buscaEmProfundidade(y, visitados, tamanhoComponente+1);
+            tamanhoComponente = buscaEmProfundidade(y, visitados, tamanhoComponente);
         }
     }
-    
     return tamanhoComponente; 
 }
 
@@ -121,14 +124,15 @@ int Grafo::maiorComponente()
     
     // Rodar em todos os componentes
     for (size_t y = 0; y < this->vertices; y++)
-    {
+    {               
+        // A função começa com 1 pois esta não conta a primeira visita
         if(!visitados[y])
-        {            
-            // A função começa com 1 pois esta não conta a primeira visita
-            maior = max(buscaEmProfundidade(y, visitados, 1), maior);
+        {
+            int temp = buscaEmProfundidade(y, visitados, 0); 
+            maior = max( temp, maior );
+            // cout << "Temp: " << temp << " Maior: " << maior << endl;
         }
     }
-    
     return maior;
 }
 
@@ -150,7 +154,7 @@ void verificarMaiorGrupo(int habitantes, int pares)
         grafo->conectarVertices(x, y);
     }
     //grafo->printMatriz();
-    cout << grafo->maiorComponente() << endl;
+     cout << grafo->maiorComponente() << endl;
     
 }
 
