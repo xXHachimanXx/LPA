@@ -10,17 +10,18 @@ class Grafo
         int vertices;
         int arestas;
         int **matriz;
-        int coomponentes;
 
     public:
         ~Grafo(); //destrutor
         Grafo(int vertices, int arestas); //construtor
-        void inicializar(); //inicializador
 
         void conectarVertices(int v1, int v2);
         void printMatriz();   
         int maiorComponente();
         int buscaEmProfundidade(int y, bool visitados[], int tamanhoComponente);
+
+    private:
+        void inicializar(); //inicializador
 
 };
 
@@ -62,7 +63,7 @@ void Grafo::inicializar()
     {
         for(int x = 0; x < this->vertices; x++)
             for(int y = 0; y < this->vertices; y++)
-                this->matriz[x][y] = -1;
+                this->matriz[x][y] = 0;
     }
 }//end init()
 
@@ -76,7 +77,7 @@ void Grafo::printMatriz()
             {
                 cout << matriz[x][y] << " ";
             }            
-            cout << "\n" << endl;
+            cout << "" << endl;
         }        
     }else{ cout << "MATRIZ NULA!"; }    
 }//end printMatriz()
@@ -85,11 +86,11 @@ void Grafo::printMatriz()
  * Método para registrar adjascência na matriz.
  */
 void Grafo::conectarVertices(int x, int y)
-{
-    if(x < y)
-        matriz[x-1][y-1] = (matriz[y-1][x-1] == -1)? 1:-1;
-    else
-        matriz[y-1][x-1] = (matriz[x-1][y-1] == -1)? 1:-1; 
+{      
+    x--; y--;
+    
+    matriz[x][y] = 1;
+    matriz[y][x] = 1;
 }//end conectarVertices()
 
 
@@ -98,12 +99,14 @@ void Grafo::conectarVertices(int x, int y)
  * OBS.: Começa sempre em 1 pois esta função não conta a primeira visita.
  */
 int Grafo::buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente)
-{    
+{   
     if(!visitados[v])
     {
-        visitados[v] = true;
-        tamanhoComponente++;
+        visitados[v] = true;    
+        tamanhoComponente++;    
     }
+
+
     for (size_t y = 0; y < this->vertices; y++)
     {
         if(!visitados[y] && this->matriz[v][y] == 1) 
@@ -111,16 +114,17 @@ int Grafo::buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente)
             tamanhoComponente = buscaEmProfundidade(y, visitados, tamanhoComponente);
         }
     }
-    return tamanhoComponente; 
+    return tamanhoComponente;
 }
 
 int Grafo::maiorComponente()
 {
-    int maior = 0;
+    int maior = 0, temp = 0;
     bool *visitados = new bool[this->vertices]; // Vetor verificador de visitas a vertices
 
     // Inicializando vetor de visitados como false
-    for (size_t y = 0; y < this->vertices; y++) visitados[y] = false;
+    for (size_t y = 0; y < this->vertices; y++) 
+        visitados[y] = false;
     
     // Rodar em todos os componentes
     for (size_t y = 0; y < this->vertices; y++)
@@ -128,14 +132,13 @@ int Grafo::maiorComponente()
         // A função começa com 1 pois esta não conta a primeira visita
         if(!visitados[y])
         {
-            int temp = buscaEmProfundidade(y, visitados, 0); 
-            maior = max( temp, maior );
-            // cout << "Temp: " << temp << " Maior: " << maior << endl;
+            temp = buscaEmProfundidade(y, visitados, 0);             
+            maior = (temp >= maior)? temp : maior;
+            temp = 0;
         }
     }
     return maior;
 }
-
 
 /**
  * Método para verificar maior grupo de pessoas na cidade.
@@ -152,10 +155,12 @@ void verificarMaiorGrupo(int habitantes, int pares)
         cin >> y;
 
         grafo->conectarVertices(x, y);
+        //cout << endl;
     }
+
     //grafo->printMatriz();
-     cout << grafo->maiorComponente() << endl;
-    
+    int maior = grafo->maiorComponente();
+    cout << maior << endl;    
 }
 
 int main()
