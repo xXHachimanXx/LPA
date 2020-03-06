@@ -15,6 +15,7 @@ class Matriz
         void lerEntradas(); 
         void mostrarMatriz();
         void procurarMaiorSoma(); 
+        int kadane(int *vetor);
 };
 
 
@@ -67,6 +68,39 @@ void Matriz::mostrarMatriz()
     }
 }//end mostrarMatriz()
 
+/**
+ * Algoritmo de Kadane para encontrar a maior soma
+ * em um vetor 1D.
+ */
+int Matriz::kadane(int *vetor)
+{
+    int maiorTotal = -1;
+    int maiorAtual = 0;
+    int tamVetor = this->linhas;
+
+    for (size_t y = 0; y < tamVetor; y++)
+    {
+        maiorAtual += vetor[y];
+        if(maiorAtual < 0) 
+            maiorAtual = 0;
+
+        if(maiorAtual > maiorTotal)
+            maiorTotal = maiorAtual;
+    }
+
+    /* ///// DEBUG /////
+    cout << "Aux: ";
+    for (size_t i = 0; i < tamVetor; i++)
+    {
+        cout << vetor[i] << " ";
+    }
+
+    cout << endl;
+    */
+    
+    return maiorTotal;
+}
+
 
 /**
  * Método de força bruta (não tão eficiente)
@@ -74,43 +108,35 @@ void Matriz::mostrarMatriz()
  */
 void Matriz::procurarMaiorSoma()
 {   
-    int maiorSoma = 0;
-    int aux = maiorSoma;
+    int maiorSoma = -1;
+    int maiorAtual = 0;
+    int aux[this->colunas];
 
-    // 'x' e 'y' são os endereços dos pontos de partida de cada variável
-    // para a realização das iterações abaixo
-    for(int x = 0; x < linhas; x++)
+    // Laço externo para definir os pontos de início de cada coluna
+    // iterada no laço inteirno.
+    for (size_t x = 0; x < this->colunas; x++)
     {
-        for(int y = 0; y < colunas; y++)
-        {
-            // 'p' e 'q' são os limites de pulos (elemento a elemento) para 
-            // a realização da soma. Estes delimitam todos os retângulos
-            // possíveis.
-            for(int p = linhas; p > 0; p--)
-            {
-                for(int q = colunas; q > 0; q--)
-                {        
-                    // 'w' e 'z' realizam a soma do retângulo delimitado por 'p' e 'q' 
-                    // partindo das coordenadas iniciais 'x' e 'y'
-                    for(int z = x; z <= linhas-p; z++)
-                    {
-                        for(int w = y; w <= colunas-q; w++)
-                        {
-                            aux += this->matriz[z][w];
-                            //cout << x << " " << y << " " << z << " " << w << " -> aux = " << aux << endl;
-                        }
-                    }
-
-                    if(aux > maiorSoma){ maiorSoma = aux; }
-                    //cout << "RESET..." << endl;
-                    aux = 0;
-
-                }//end for
-            }//end for
-        }//end for
-    }//end for
+        // Inicializar vetor auxiliar
+        for (int t = 0; t < this->colunas; t++)
+            aux[t] = 0;
         
+        // Laço para iterar todas as colunas a partir do ponto de início
+        // pré-determinado pelo laço externo.
+        for (size_t y = x; y < this->colunas; y++)
+        {
+            // Somar coluna atual com as colunas da direita 
+            for (size_t z = 0; z < this->linhas; z++)
+                aux[z] = aux[z] + this->matriz[z][y];
 
+            // Usar algoritmo linear para trazer a maior soma
+            // do vetor aux.
+            maiorAtual = kadane(aux);  
+
+            // Pegar maior soma
+            maiorSoma = max(maiorAtual, maiorSoma);            
+        }
+    }
+            
     // Mostrar resultado
     cout << maiorSoma;
 

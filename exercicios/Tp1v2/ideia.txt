@@ -1,0 +1,18 @@
+Considere a seguinte matriz a:
+
+ 1  2 -1 
+-3 -1  4 
+ 1 -5  2
+
+1° vetor = 1° linha
+1 2 -1 = segmento de soma máxima [1 2]  soma 3
+2° vetor = 1° linha + 2° linha
+-2 1 3 = segmento de soma máxima [1 3] soma 4
+3° vetor = 1° linha + 2° linha + 3° linha
+1 -4 5 = segmento de soma máxima [5] soma 5
+4° vetor = 2° linha
+-3 -1 4 = segmento de soma máxima [4] soma 4
+5° vetor = 2° linha + 3° linha
+2 -6 6  = segmento de soma máxima [6] soma 6
+6° vetor = 3° linha
+1 -5 2 = segmento de soma máxima [2] soma 2
