@@ -87,6 +87,11 @@ vector<string> lerEstacoes(int estacoes)
     return nomes;
 }
 
+void criarConeccoes(Grafo g)
+{
+    
+}
+
 int indexof( vector<string> estacoes, string estacao)
 {
     int index = -1;
@@ -113,7 +118,10 @@ int main()
     while(estacoes != 0 && conexoes != 0)
     {
         vector<string> estacoes = lerEstacoes(numEstacoes);        
-        
+        Grafo g(numEstacoes, numEstacoes);
+
+        criarConeccoes(g);
+
         cin >> numEstacoes >> numConexoes;
     }
 
