@@ -76,6 +76,8 @@ void Grafo::printMatriz()
             }            
             cout << "" << endl;
         }        
+        cout << endl;
+        
     }else{ cout << "MATRIZ NULA!"; }    
 }//end printMatriz()
 
@@ -143,6 +145,7 @@ int main()
 {
     int numEstacoes, numConexoes;
     string nome;
+    string estacaoInicial;
 
     cin >> numEstacoes >> numConexoes;
 
@@ -153,7 +156,8 @@ int main()
 
         g.criarConexoes(estacoes, numConexoes);
         g.printMatriz();
+        
+        cin >> estacaoInicial;
         cin >> numEstacoes >> numConexoes;
     }
-
 }
