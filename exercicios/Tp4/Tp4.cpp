@@ -8,18 +8,17 @@ using namespace std;
 class Grafo
 {
     private:
-        int vertices;
-        int arestas;
+        int estacoes;
+        int conexoes;
         int **matriz;
 
     public:
         ~Grafo(); //Destrutor
         Grafo();  //construtor
-        Grafo(int vertices, int arestas);
-        void conectarVertices(int v1, int v2);
+        Grafo(int estacoes, int conexoes);
+        void conectarVertices(int v1, int v2, int distancia);
         void printMatriz();   
-
-    private:
+        void criarConexoes(vector<string>, int numConexoes);
         void inicializar(); //inicializador
 };
 
@@ -28,12 +27,29 @@ class Grafo
  */
 Grafo::~Grafo()
 {
-    for(int y = 0; y < vertices; y++)
+    for(int y = 0; y < estacoes; y++)
     {
         delete matriz[y];
     }
     delete matriz;
 }
+
+/**
+ * Método para inicializar a matriz de adjascência.
+ */
+Grafo::Grafo(int estacoes, int conexoes)
+{
+    this->estacoes = estacoes;
+    this->conexoes = conexoes;
+    this->matriz = new int*[estacoes];
+
+    for(int y = 0; y < estacoes; y++)
+    {
+        this->matriz[y] = new int[estacoes];
+    }//end for        
+
+    inicializar();    
+}//end Grafo()
 
 /**
  * Inicializar todas as adjascências com '0'.
@@ -42,8 +58,8 @@ void Grafo::inicializar()
 {
     if(matriz != NULL)
     {
-        for(int x = 0; x < this->vertices; x++)
-            for(int y = 0; y < this->vertices; y++)
+        for(int x = 0; x < this->estacoes; x++)
+            for(int y = 0; y < this->estacoes; y++)
                 this->matriz[x][y] = 0;
     }
 }//end init()
@@ -52,9 +68,9 @@ void Grafo::printMatriz()
 {
     if(matriz != NULL)
     {
-        for(int x = 0; x < this->vertices; x++)
+        for(int x = 0; x < this->estacoes; x++)
         {
-            for(int y = 0; y < this->vertices; y++)
+            for(int y = 0; y < this->estacoes; y++)
             {
                 cout << matriz[x][y] << " ";
             }            
@@ -66,12 +82,10 @@ void Grafo::printMatriz()
 /**
  * Método para registrar adjascência na matriz.
  */
-void Grafo::conectarVertices(int x, int y)
-{      
-    x--; y--;
-    
-    matriz[x][y] = 1;
-    matriz[y][x] = 1;
+void Grafo::conectarVertices(int x, int y, int distancia)
+{   
+    this->matriz[x][y] = distancia;
+    this->matriz[y][x] = distancia;
 }//end conectarVertices()
 
 vector<string> lerEstacoes(int estacoes)
@@ -87,18 +101,13 @@ vector<string> lerEstacoes(int estacoes)
     return nomes;
 }
 
-void criarConeccoes(Grafo g)
-{
-    
-}
-
-int indexof( vector<string> estacoes, string estacao)
+int index_of( vector<string> estacoes, string estacao)
 {
     int index = -1;
     
     for(int y = 0; y < estacoes.size(); y++)
     {
-        if(estacoes.at(y).equals(estacao))
+        if( !(estacoes.at(y)).compare(estacao) )
         {
             index = y;
             y = estacoes.size();
@@ -108,20 +117,42 @@ int indexof( vector<string> estacoes, string estacao)
     return index;
 }
 
+void Grafo::criarConexoes(vector<string> estacoes, int numConexoes)
+{
+    string estacao1;
+    string estacao2;
+    int index1;
+    int index2;
+    int distancia;
+
+    for(int y = 0; y < numConexoes; y++)
+    {
+        cin >> estacao1;
+        cin >> estacao2;
+        cin >> distancia;
+
+        index1 = index_of(estacoes, estacao1);
+        index2 = index_of(estacoes, estacao2);
+        // cout << "I1: " << index1 << " i2: " << index2 << endl;       
+        // cout << "Estacao1: " << estacao1 << " Estacao2: " << estacao2 << " Distacia: " << distancia << endl;
+        this->conectarVertices(index1, index2, distancia);
+    }
+}
+
 int main()
 {
-    int estacoes, conexoes;
+    int numEstacoes, numConexoes;
     string nome;
 
     cin >> numEstacoes >> numConexoes;
 
-    while(estacoes != 0 && conexoes != 0)
+    while(numEstacoes != 0 && numConexoes != 0)
     {
         vector<string> estacoes = lerEstacoes(numEstacoes);        
-        Grafo g(numEstacoes, numEstacoes);
+        Grafo g(numEstacoes, numConexoes);
 
-        criarConeccoes(g);
-
+        g.criarConexoes(estacoes, numConexoes);
+        g.printMatriz();
         cin >> numEstacoes >> numConexoes;
     }
 
