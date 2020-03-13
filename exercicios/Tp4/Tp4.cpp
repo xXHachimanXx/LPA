@@ -14,13 +14,14 @@ class Grafo
         int vertices;
         int arestas;
         int **matriz;        
-        int djkstra(int inicio, int destino);
         int menorDistancia(int* distancias, bool* visitados);
 
     public:
         ~Grafo(); //Destrutor
         Grafo();  //construtor
         Grafo(int vertices, int arestas);
+        Grafo clone();
+        int djkstra(int inicio, int destino);
         void conectarVertices(int v1, int v2, int distancia);
         void printMatriz();   
         void criarConexoes(vector<string>, int numConexoes);
@@ -51,11 +52,25 @@ Grafo::Grafo(int vertices, int arestas)
 
     for(int y = 0; y < vertices; y++)
     {
-        this->matriz[y] = new int[vertices];
+        this->matriz[y] = new int[arestas];
     }//end for        
 
     inicializar();    
 }//end Grafo()
+
+Grafo Grafo::clone()
+{
+    Grafo g(this->vertices, this->arestas);
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        for (size_t y = 0; y < this->arestas; y++)
+        {
+            g.matriz[x][y] = this->matriz[x][y];
+        }        
+    }
+        
+    return g;
+}
 
 /**
  * Inicializar todas as adjascências com '0'.
@@ -226,6 +241,14 @@ int main()
         g.printMatriz();
         
         cin >> estacaoInicial;
+        int menorCaminho = g.djkstra(index_of(estacoes, estacaoInicial), numEstacoes-1);
+
+        if (menorCaminho > 0)
+            cout << menorCaminho << endl;
+        else
+            cout << "Impossible" << endl; 
+
+
         cin >> numEstacoes >> numConexoes;
     }
 }
