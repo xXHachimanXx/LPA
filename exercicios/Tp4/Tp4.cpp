@@ -2,24 +2,30 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
+#include <limits.h>
+
+#define infinity INT_MAX
 
 using namespace std;
 
 class Grafo
 {
     private:
-        int estacoes;
-        int conexoes;
-        int **matriz;
+        int vertices;
+        int arestas;
+        int **matriz;        
+        int djkstra(int inicio, int destino);
+        int menorDistancia(int* distancias, bool* visitados);
 
     public:
         ~Grafo(); //Destrutor
         Grafo();  //construtor
-        Grafo(int estacoes, int conexoes);
+        Grafo(int vertices, int arestas);
         void conectarVertices(int v1, int v2, int distancia);
         void printMatriz();   
         void criarConexoes(vector<string>, int numConexoes);
         void inicializar(); //inicializador
+
 };
 
 /**
@@ -27,7 +33,7 @@ class Grafo
  */
 Grafo::~Grafo()
 {
-    for(int y = 0; y < estacoes; y++)
+    for(int y = 0; y < vertices; y++)
     {
         delete matriz[y];
     }
@@ -37,15 +43,15 @@ Grafo::~Grafo()
 /**
  * Método para inicializar a matriz de adjascência.
  */
-Grafo::Grafo(int estacoes, int conexoes)
+Grafo::Grafo(int vertices, int arestas)
 {
-    this->estacoes = estacoes;
-    this->conexoes = conexoes;
-    this->matriz = new int*[estacoes];
+    this->vertices = vertices;
+    this->arestas = arestas;
+    this->matriz = new int*[vertices];
 
-    for(int y = 0; y < estacoes; y++)
+    for(int y = 0; y < vertices; y++)
     {
-        this->matriz[y] = new int[estacoes];
+        this->matriz[y] = new int[vertices];
     }//end for        
 
     inicializar();    
@@ -58,8 +64,8 @@ void Grafo::inicializar()
 {
     if(matriz != NULL)
     {
-        for(int x = 0; x < this->estacoes; x++)
-            for(int y = 0; y < this->estacoes; y++)
+        for(int x = 0; x < this->vertices; x++)
+            for(int y = 0; y < this->vertices; y++)
                 this->matriz[x][y] = 0;
     }
 }//end init()
@@ -68,9 +74,9 @@ void Grafo::printMatriz()
 {
     if(matriz != NULL)
     {
-        for(int x = 0; x < this->estacoes; x++)
+        for(int x = 0; x < this->vertices; x++)
         {
-            for(int y = 0; y < this->estacoes; y++)
+            for(int y = 0; y < this->vertices; y++)
             {
                 cout << matriz[x][y] << " ";
             }            
@@ -89,6 +95,68 @@ void Grafo::conectarVertices(int x, int y, int distancia)
     this->matriz[x][y] = distancia;
     this->matriz[y][x] = distancia;
 }//end conectarVertices()
+
+/*
+ * Escolher um vértice não visitado x
+ * cuja distância mínima para V 0 seja a
+ * menor conhecida. Se x for NULO, termine 
+ * o algoritmo.
+ */
+int Grafo::menorDistancia(int* distancias, bool* visitados)
+{
+    int idMenor = -1;
+    int menor = infinity;
+
+    // Escolher um vértice não visitado x cuja distância 
+    // mínima para V0 seja a menor conhecida. 
+    for (size_t x = 0; x < this->vertices; x++)
+    {        
+        if(!visitados[x] && distancias[x] <= menor)
+        {
+            menor = distancias[x];
+            idMenor = x;            
+        }
+    }
+    
+    return idMenor;
+
+}
+
+/**
+ * Algoritmo para encontrar o menor caminho entre dois vértices.
+ */
+int Grafo::djkstra(int inicio, int destino)
+{
+    int distancias[this->vertices];
+    bool visitados[this->vertices];
+    
+    // Inicializações
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        distancias[x] = (this->matriz[inicio][x] > 0)? this->matriz[inicio][x] : infinity;
+        visitados[x] = false;
+    }
+    distancias[inicio] = 0;
+
+    for (size_t x = 0; x < this->vertices-1; x++)
+    {
+        int menorDistancia = this->menorDistancia(distancias, visitados);
+        visitados[menorDistancia] = true;
+
+        for (size_t y = 0; y < this->vertices; y++)
+        {
+            if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
+                distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
+            {
+                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
+                this->matriz[menorDistancia][y];
+                this->matriz[y][menorDistancia];
+            }   
+        }    
+    }
+    
+    return distancias[destino-1];
+}
 
 vector<string> lerEstacoes(int estacoes)
 {
