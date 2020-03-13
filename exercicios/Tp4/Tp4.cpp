@@ -143,7 +143,7 @@ int Grafo::menorDistancia(int* distancias, bool* visitados)
 int Grafo::djkstra(int inicio, int destino)
 {
     int distancias[this->vertices];
-    bool visitados[this->vertices];
+    bool visitados[this->vertices];    
     
     // Inicializações
     for (size_t x = 0; x < this->vertices; x++)
@@ -153,22 +153,26 @@ int Grafo::djkstra(int inicio, int destino)
     }
     distancias[inicio] = 0;
 
+    // Para todos os vértices faça
     for (size_t x = 0; x < this->vertices-1; x++)
     {
-        int menorDistancia = this->menorDistancia(distancias, visitados);
-        visitados[menorDistancia] = true;
+        //pegar menor distância entre o vertice inicial e o atual
+        int menorDistancia = this->menorDistancia(distancias, visitados); 
+        visitados[menorDistancia] = true; // Marcar como visitado
 
+        // Para cada vizinho não visitado do vertice
         for (size_t y = 0; y < this->vertices; y++)
         {
             if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
                 distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
             {
                 distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-                this->matriz[menorDistancia][y];
-                this->matriz[y][menorDistancia];
+                this->matriz[menorDistancia][y] = 0;
+                this->matriz[y][menorDistancia] = 0;
             }   
         }    
     }
+    
     
     return distancias[destino-1];
 }
@@ -238,17 +242,18 @@ int main()
         Grafo g(numEstacoes, numConexoes);
 
         g.criarConexoes(estacoes, numConexoes);
-        g.printMatriz();
         
-        cin >> estacaoInicial;
-        int menorCaminho = g.djkstra(index_of(estacoes, estacaoInicial), numEstacoes-1);
+        cin >> estacaoInicial; 
+        int menorCaminho = g.djkstra(index_of(estacoes, estacaoInicial), numEstacoes);
 
         if (menorCaminho > 0)
             cout << menorCaminho << endl;
         else
             cout << "Impossible" << endl; 
 
+        g.~Grafo();
 
         cin >> numEstacoes >> numConexoes;
     }
+    return 0;
 }
