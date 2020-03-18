@@ -14,4 +14,38 @@ Temple
 Picadilly Victoria 2
 Temple Queensway 100
 Temple
+20 12
+package
+morning
+email
+institute
+understand
+market
+receive
+making
+chicago
+course
+william
+result
+created
+percent
+california
+middle
+cameras
+rights
+boston
+peter
+middle peter 27
+receive market 15
+percent institute 16
+result morning 8
+institute boston 26
+package chicago 6
+receive cameras 27
+california package 10
+percent california 14
+created making 14
+institute course 11
+package making 17
+created
 0 0

@@ -3,30 +3,47 @@
 #include <string.h>
 #include <vector>
 #include <limits.h>
+#include <algorithm>
 
 #define infinity INT_MAX
 
 using namespace std;
 
+class Aresta
+{
+public:
+    int v1, v2;
+    int peso;
+
+    Aresta(int v1, int v2, int peso);
+};
+
+Aresta::Aresta(int v1, int v2, int peso)
+{
+    this->v1 = v1;
+    this->v2 = v2;
+    this->peso = peso;
+}
+
 class Grafo
 {
-    private:
-        int vertices;
-        int arestas;
-        int **matriz;        
-        int menorDistancia(int* distancias, bool* visitados);
+private:
+    int vertices;
+    int arestas;
+    int **matriz;
+    int menorDistancia(int *distancias, bool *visitados);
 
-    public:
-        ~Grafo(); //Destrutor
-        Grafo();  //construtor
-        Grafo(int vertices, int arestas);
-        Grafo clone();
-        int djkstra(int inicio, int destino);
-        void conectarVertices(int v1, int v2, int distancia);
-        void printMatriz();   
-        void criarConexoes(vector<string>, int numConexoes);
-        void inicializar(); //inicializador
+public:
+    ~Grafo(); //Destrutor
+    Grafo();  //construtor
+    Grafo(int vertices, int arestas);
 
+    int djkstra(int inicio, int destino);
+    void kruskal(vector<Aresta> arestas);
+    void conectarVertices(int v1, int v2, int distancia);
+    void printMatriz();
+    void criarConexoes(vector<string>, int numConexoes);
+    void inicializar(); //inicializador
 };
 
 /**
@@ -34,7 +51,7 @@ class Grafo
  */
 Grafo::~Grafo()
 {
-    for(int y = 0; y < vertices; y++)
+    for (int y = 0; y < vertices; y++)
     {
         delete matriz[y];
     }
@@ -48,140 +65,63 @@ Grafo::Grafo(int vertices, int arestas)
 {
     this->vertices = vertices;
     this->arestas = arestas;
-    this->matriz = new int*[vertices];
+    this->matriz = new int *[vertices];
 
-    for(int y = 0; y < vertices; y++)
+    for (int y = 0; y < vertices; y++)
     {
         this->matriz[y] = new int[arestas];
-    }//end for        
+    } //end for
 
-    inicializar();    
-}//end Grafo()
-
-Grafo Grafo::clone()
-{
-    Grafo g(this->vertices, this->arestas);
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        for (size_t y = 0; y < this->arestas; y++)
-        {
-            g.matriz[x][y] = this->matriz[x][y];
-        }        
-    }
-        
-    return g;
-}
+    inicializar();
+} //end Grafo()
 
 /**
  * Inicializar todas as adjascências com '0'.
  */
 void Grafo::inicializar()
 {
-    if(matriz != NULL)
+    if (matriz != NULL)
     {
-        for(int x = 0; x < this->vertices; x++)
-            for(int y = 0; y < this->vertices; y++)
+        for (int x = 0; x < this->vertices; x++)
+            for (int y = 0; y < this->vertices; y++)
                 this->matriz[x][y] = 0;
     }
-}//end init()
+} //end init()
 
 void Grafo::printMatriz()
 {
-    if(matriz != NULL)
+    if (matriz != NULL)
     {
-        for(int x = 0; x < this->vertices; x++)
+        for (int x = 0; x < this->vertices; x++)
         {
-            for(int y = 0; y < this->vertices; y++)
+            for (int y = 0; y < this->vertices; y++)
             {
                 cout << matriz[x][y] << " ";
-            }            
+            }
             cout << "" << endl;
-        }        
+        }
         cout << endl;
-        
-    }else{ cout << "MATRIZ NULA!"; }    
-}//end printMatriz()
+    }
+    else
+    {
+        cout << "MATRIZ NULA!";
+    }
+} //end printMatriz()
 
 /**
  * Método para registrar adjascência na matriz.
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
-{   
+{
     this->matriz[x][y] = distancia;
     this->matriz[y][x] = distancia;
-}//end conectarVertices()
-
-/*
- * Escolher um vértice não visitado x
- * cuja distância mínima para V 0 seja a
- * menor conhecida. Se x for NULO, termine 
- * o algoritmo.
- */
-int Grafo::menorDistancia(int* distancias, bool* visitados)
-{
-    int idMenor = -1;
-    int menor = infinity;
-
-    // Escolher um vértice não visitado x cuja distância 
-    // mínima para V0 seja a menor conhecida. 
-    for (size_t x = 0; x < this->vertices; x++)
-    {        
-        if(!visitados[x] && distancias[x] <= menor)
-        {
-            menor = distancias[x];
-            idMenor = x;            
-        }
-    }
-    
-    return idMenor;
-
-}
-
-/**
- * Algoritmo para encontrar o menor caminho entre dois vértices.
- */
-int Grafo::djkstra(int inicio, int destino)
-{
-    int distancias[this->vertices];
-    bool visitados[this->vertices];    
-    
-    // Inicializações
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        distancias[x] = (this->matriz[inicio][x] > 0)? this->matriz[inicio][x] : infinity;
-        visitados[x] = false;
-    }
-    distancias[inicio] = 0;
-
-    // Para todos os vértices faça
-    for (size_t x = 0; x < this->vertices-1; x++)
-    {
-        //pegar menor distância entre o vertice inicial e o atual
-        int menorDistancia = this->menorDistancia(distancias, visitados); 
-        visitados[menorDistancia] = true; // Marcar como visitado
-
-        // Para cada vizinho não visitado do vertice
-        for (size_t y = 0; y < this->vertices; y++)
-        {
-            if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
-                distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
-            {
-                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-                this->matriz[menorDistancia][y] = 0;
-                this->matriz[y][menorDistancia] = 0;
-            }   
-        }    
-    }
-    
-    
-    return distancias[destino-1];
-}
+} //end conectarVertices()
 
 vector<string> lerEstacoes(int estacoes)
 {
     vector<string> nomes;
     string nome;
-    for(int y = 0; y < estacoes; y++)
+    for (int y = 0; y < estacoes; y++)
     {
         cin >> nome;
         nomes.push_back(nome);
@@ -190,13 +130,13 @@ vector<string> lerEstacoes(int estacoes)
     return nomes;
 }
 
-int index_of( vector<string> estacoes, string estacao)
+int index_of(vector<string> estacoes, string estacao)
 {
     int index = -1;
-    
-    for(int y = 0; y < estacoes.size(); y++)
+
+    for (int y = 0; y < estacoes.size(); y++)
     {
-        if( !(estacoes.at(y)).compare(estacao) )
+        if (!(estacoes.at(y)).compare(estacao))
         {
             index = y;
             y = estacoes.size();
@@ -206,26 +146,47 @@ int index_of( vector<string> estacoes, string estacao)
     return index;
 }
 
-void Grafo::criarConexoes(vector<string> estacoes, int numConexoes)
+int buscar(int *arvore, int x)
 {
-    string estacao1;
-    string estacao2;
-    int index1;
-    int index2;
-    int distancia;
+    while (x != arvore[x])
+        x = arvore[x];
 
-    for(int y = 0; y < numConexoes; y++)
+    return x;
+}
+bool menor(Aresta a1, Aresta a2)
+{
+    return (a1.peso < a2.peso);
+}
+
+void Grafo::kruskal(vector<Aresta> conexoes)
+{
+    int somaPesos = 0;
+    int vertices[this->vertices];
+    int contadorDeArestas = this->vertices - 1;
+
+    for (size_t x = 0; x < this->vertices; x++)
     {
-        cin >> estacao1;
-        cin >> estacao2;
-        cin >> distancia;
-
-        index1 = index_of(estacoes, estacao1);
-        index2 = index_of(estacoes, estacao2);
-        // cout << "I1: " << index1 << " i2: " << index2 << endl;       
-        // cout << "Estacao1: " << estacao1 << " Estacao2: " << estacao2 << " Distacia: " << distancia << endl;
-        this->conectarVertices(index1, index2, distancia);
+        vertices[x] = x;
     }
+
+    sort(conexoes.begin(), conexoes.end(), menor);
+    for (size_t x = 0; x < conexoes.size(); x++)
+    {
+        int v1 = buscar(vertices, conexoes[x].v1);
+        int v2 = buscar(vertices, conexoes[x].v2);
+
+        if (v1 != v2)
+        {
+            somaPesos += conexoes[x].peso;
+            vertices[v1] = v2;
+            contadorDeArestas--;
+        }
+    }
+
+    if (contadorDeArestas > 0)
+        cout << "Impossible" << endl;
+    else
+        cout << somaPesos << endl;
 }
 
 int main()
@@ -233,27 +194,41 @@ int main()
     int numEstacoes, numConexoes;
     string nome;
     string estacaoInicial;
+    string estacao1;
+    string estacao2;
+    int index1;
+    int index2;
+    int distancia;
 
     cin >> numEstacoes >> numConexoes;
 
-    while(numEstacoes != 0 && numConexoes != 0)
+    while (numEstacoes != 0 && numConexoes != 0)
     {
-        vector<string> estacoes = lerEstacoes(numEstacoes);        
+        vector<string> estacoes = lerEstacoes(numEstacoes);
+        vector<Aresta> conexoes;
+
         Grafo g(numEstacoes, numConexoes);
 
-        g.criarConexoes(estacoes, numConexoes);
-        
-        cin >> estacaoInicial; 
-        int menorCaminho = g.djkstra(index_of(estacoes, estacaoInicial), numEstacoes);
+        // CriarConexoes;
+        for (int y = 0; y < numConexoes; ++y)
+        {
+            cin >> estacao1;
+            cin >> estacao2;
+            cin >> distancia;
 
-        if (menorCaminho > 0)
-            cout << menorCaminho << endl;
-        else
-            cout << "Impossible" << endl; 
+            index1 = index_of(estacoes, estacao1);
+            index2 = index_of(estacoes, estacao2);
 
-        g.~Grafo();
+            Aresta conexao(index1, index2, distancia);
+            conexoes.push_back(conexao);
 
+            g.conectarVertices(index1, index2, distancia);
+        }
+
+        cin >> estacaoInicial;
+        g.kruskal(conexoes);
         cin >> numEstacoes >> numConexoes;
     }
     return 0;
 }
+
