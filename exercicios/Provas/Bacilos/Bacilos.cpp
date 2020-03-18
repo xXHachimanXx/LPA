@@ -9,7 +9,6 @@ unsigned long long fibo[1501];
 
 void gerarFibonacci()
 {
-    // bool maduro = true;
     unsigned long long x = 1, y = 1, temp = 0;    
     fibo[0] = 0; 
     fibo[1] = 1; 
@@ -20,7 +19,6 @@ void gerarFibonacci()
     {
         temp = (x + y)%1000, fibo[z] = temp, x = y, y = temp;
     }
-    // cout << (y%1000)/100 << (y%100)/10 << y%10 << endl;
 }
 
 int toInt(char c)
