@@ -22,8 +22,9 @@ Aresta::Aresta(int v1, int v2, int peso)
 {
     this->v1 = v1;
     this->v2 = v2;
-    this->peso = peso;
+    this->peso = peso;    
 }
+
 
 class Grafo
 {
@@ -42,7 +43,7 @@ public:
     void kruskal(vector<Aresta> arestas);
     void conectarVertices(int v1, int v2, int distancia);
     void printMatriz();
-    void criarConexoes(vector<string>, int numConexoes);
+    void criarConexoes(vector<string> estacoes, int numConexoes);
     void inicializar(); //inicializador
 };
 
@@ -69,10 +70,11 @@ Grafo::Grafo(int vertices, int arestas)
 
     for (int y = 0; y < vertices; y++)
     {
-        this->matriz[y] = new int[arestas];
+        this->matriz[y] = new int[vertices];
     } //end for
 
     inicializar();
+    
 } //end Grafo()
 
 /**
@@ -85,7 +87,7 @@ void Grafo::inicializar()
         for (int x = 0; x < this->vertices; x++)
             for (int y = 0; y < this->vertices; y++)
                 this->matriz[x][y] = 0;
-    }
+    }    
 } //end init()
 
 void Grafo::printMatriz()
@@ -94,7 +96,7 @@ void Grafo::printMatriz()
     {
         for (int x = 0; x < this->vertices; x++)
         {
-            for (int y = 0; y < this->vertices; y++)
+            for (int y = 0; y < this->arestas; y++)
             {
                 cout << matriz[x][y] << " ";
             }
@@ -130,9 +132,11 @@ vector<string> lerEstacoes(int estacoes)
     return nomes;
 }
 
+/*
 int index_of(vector<string> estacoes, string estacao)
 {
-    int index = -1;
+    cout << "CAJISUICUANS" << endl;
+    int index;
 
     for (int y = 0; y < estacoes.size(); y++)
     {
@@ -145,7 +149,7 @@ int index_of(vector<string> estacoes, string estacao)
 
     return index;
 }
-
+*/
 int buscar(int *arvore, int x)
 {
     while (x != arvore[x])
@@ -196,6 +200,8 @@ int main()
     string estacaoInicial;
     string estacao1;
     string estacao2;
+    vector<Aresta> conexoes;
+    vector<string> estacoes;
     int index1;
     int index2;
     int distancia;
@@ -204,31 +210,48 @@ int main()
 
     while (numEstacoes != 0 && numConexoes != 0)
     {
-        vector<string> estacoes = lerEstacoes(numEstacoes);
-        vector<Aresta> conexoes;
-
-        Grafo g(numEstacoes, numConexoes);
+        estacoes = lerEstacoes(numEstacoes);
+        
+        Grafo* g = new Grafo(numEstacoes, numConexoes);
 
         // CriarConexoes;
-        for (int y = 0; y < numConexoes; ++y)
+        for (int y = 0; y < numConexoes; y++)
         {
             cin >> estacao1;
             cin >> estacao2;
             cin >> distancia;
 
-            index1 = index_of(estacoes, estacao1);
-            index2 = index_of(estacoes, estacao2);
+            // ACHAR INDEX1
+            for (int z = 0; z < estacoes.size(); z++)
+            {
+                if (!(estacoes.at(z)).compare(estacao1))
+                {
+                    index1 = z;
+                    z = estacoes.size();
+                }
+            }
 
-            Aresta conexao(index1, index2, distancia);
-            conexoes.push_back(conexao);
+            // ACHAR INDEX2
+            for (int z = 0; z < estacoes.size(); z++)
+            {
+                if (!(estacoes.at(z)).compare(estacao2))
+                {
+                    index2 = z;
+                    z = estacoes.size();
+                }
+            }
+            g->conectarVertices(index1, index2, distancia);
+            conexoes.push_back(Aresta(index1, index2, distancia));
 
-            g.conectarVertices(index1, index2, distancia);
-        }
-
+        } // end for
         cin >> estacaoInicial;
-        g.kruskal(conexoes);
+
+        g->kruskal(conexoes);
+
+        conexoes.clear();
+        estacoes.clear();
+
         cin >> numEstacoes >> numConexoes;
     }
     return 0;
 }
-

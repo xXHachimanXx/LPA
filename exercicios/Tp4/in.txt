@@ -14,38 +14,47 @@ Temple
 Picadilly Victoria 2
 Temple Queensway 100
 Temple
-20 12
-package
-morning
-email
-institute
-understand
-market
+14 27
+customers
 receive
-making
-chicago
-course
-william
-result
-created
-percent
-california
-middle
-cameras
-rights
-boston
-peter
-middle peter 27
-receive market 15
-percent institute 16
-result morning 8
-institute boston 26
-package chicago 6
-receive cameras 27
-california package 10
-percent california 14
-created making 14
-institute course 11
-package making 17
-created
+latest
+force
+journal
+transfer
+opinion
+standards
+central
+structure
+thomas
+position
+section
+months
+receive months 5
+months customers 7
+transfer section 25
+section position 8
+thomas opinion 5
+thomas latest 30
+position structure 23
+journal standards 7
+months central 22
+standards structure 12
+opinion section 27
+journal latest 1
+receive thomas 26
+section central 30
+journal position 5
+journal latest 5
+customers standards 26
+transfer structure 27
+months structure 12
+latest structure 13
+standards transfer 9
+position transfer 1
+section latest 27
+thomas central 18
+section opinion 22
+force opinion 18
+receive months 6
+central
 0 0
