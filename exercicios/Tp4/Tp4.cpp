@@ -132,31 +132,14 @@ vector<string> lerEstacoes(int estacoes)
     return nomes;
 }
 
-/*
-int index_of(vector<string> estacoes, string estacao)
+int buscar(int *vertices, int x)
 {
-    cout << "CAJISUICUANS" << endl;
-    int index;
-
-    for (int y = 0; y < estacoes.size(); y++)
-    {
-        if (!(estacoes.at(y)).compare(estacao))
-        {
-            index = y;
-            y = estacoes.size();
-        }
-    }
-
-    return index;
-}
-*/
-int buscar(int *arvore, int x)
-{
-    while (x != arvore[x])
-        x = arvore[x];
+    while (x != vertices[x])
+        x = vertices[x];
 
     return x;
 }
+
 bool menor(Aresta a1, Aresta a2)
 {
     return (a1.peso < a2.peso);
@@ -173,7 +156,10 @@ void Grafo::kruskal(vector<Aresta> conexoes)
         vertices[x] = x;
     }
 
-    sort(conexoes.begin(), conexoes.end(), menor);
+    // Ordenar arestas por peso
+    sort(conexoes.begin(), conexoes.end(), menor);  
+
+
     for (size_t x = 0; x < conexoes.size(); x++)
     {
         int v1 = buscar(vertices, conexoes[x].v1);
@@ -214,7 +200,7 @@ int main()
         
         Grafo* g = new Grafo(numEstacoes, numConexoes);
 
-        // CriarConexoes;
+        // CriarConexoes
         for (int y = 0; y < numConexoes; y++)
         {
             cin >> estacao1;
@@ -240,10 +226,13 @@ int main()
                     z = estacoes.size();
                 }
             }
+
+            // Conectar Vértices
             g->conectarVertices(index1, index2, distancia);
             conexoes.push_back(Aresta(index1, index2, distancia));
 
         } // end for
+
         cin >> estacaoInicial;
 
         g->kruskal(conexoes);

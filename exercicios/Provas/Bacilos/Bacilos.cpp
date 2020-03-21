@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// Variável sim. Pode ir la e denunciar.
+// Variável global sim. Pode ir la e denunciar.
 unsigned long long fibo[1501];
 
 void gerarFibonacci()
@@ -23,7 +23,7 @@ void gerarFibonacci()
 
 int toInt(char c)
 {
-    return c - 48;
+    return c - '0';
 }
 
 int main()
