@@ -1,0 +1,25 @@
+Atualmente, muitas montadoras estão desenvolvendo carros que usam eletricidade
+de gasolina. As baterias usadas nesses
+os carros geralmente são muito pesados ​​e caros; portanto, os projetistas devem fazer uma troca importante ao determinar a capacidade da bateria e, portanto, a faixa de
+esses veículos. Sua tarefa é ajudar a determinar o intervalo mínimo necessário para
+que é possível que o carro viaje entre duas cidades do continente.
+A rede rodoviária no continente
+consiste em cidades conectadas por estradas bidirecionais de diferentes comprimentos. Cada
+cidade contém uma estação de carregamento. Ao longo
+uma rota entre duas cidades, o carro pode passar por qualquer número de cidades, mas a distância entre
+cada par de cidades consecutivas ao longo da rota não deve exceder o alcance do carro. O que é
+o alcance mínimo do carro para que haja uma rota que satisfaça essa restrição entre cada par de
+cidades do continente?
+
+INPUT:
+A entrada consiste em uma sequência de redes rodoviárias. A primeira linha de cada rede rodoviária contém dois
+números inteiros positivos n e m, o número de cidades e estradas. Cada um desses números inteiros não é maior que
+um milhão. As cidades são numeradas de 0 a n - 1. A primeira linha é seguida por m mais linhas, cada uma
+descrevendo uma estrada. Cada linha contém três números inteiros não negativos. Os dois primeiros inteiros são os
+números das duas cidades conectadas pela estrada. O terceiro número inteiro é o comprimento da estrada. O último
+A rede rodoviária é seguida por uma linha contendo dois zeros, indicando o final da entrada.
+
+OUTPUT:
+Para cada rede rodoviária, imprima uma linha contendo um número inteiro, o alcance mínimo do carro que permite
+dirigir de todas as cidades para todas as outras cidades. Se não for possível dirigir de uma cidade para outra
+cidade, independentemente do alcance do carro, em vez disso, produza uma linha que contém a palavra "IMPOSSÍVEL".
