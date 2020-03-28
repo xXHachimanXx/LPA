@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "Entrar com o numero do TP: "; 
 read N;
 echo -e "$N";

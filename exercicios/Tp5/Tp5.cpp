@@ -100,18 +100,10 @@ void Grafo::printMatriz()
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
 {
-    // if(distancia != 0 && distancia <= this->matriz[x][y])
-    // {
-    //     this->matriz[x][y] = distancia;
-    // }
-
-    // if(distancia != 0 && distancia <= this->matriz[x][y])
-    // {
-    //     this->matriz[y][x] = distancia;
-    // }
-
-    this->matriz[x][y] = 1;
-    this->matriz[y][x] = 1;
+    if(distancia != 0 && distancia <= this->matriz[x][y])
+    {
+        this->matriz[x][y] = distancia;
+    }    
     
 } //end conectarVertices()
 
