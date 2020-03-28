@@ -20,6 +20,8 @@ public:
     Grafo(int vertices, int arestas);
 
     int djkstra(int inicio, int destino);
+    int djkstraModificado(int inicio, int destino);
+    void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
     void printMatriz();
     void inicializar(); //inicializador
@@ -48,7 +50,7 @@ Grafo::Grafo(int vertices, int arestas)
 
     for (int y = 0; y < vertices; y++)
     {
-        this->matriz[y] = new int[vertices];
+        this->matriz[y] = new int[arestas];
     } //end for
 
     inicializar();
@@ -63,8 +65,13 @@ void Grafo::inicializar()
     if (matriz != NULL)
     {
         for (int x = 0; x < this->vertices; x++)
-            for (int y = 0; y < this->vertices; y++)
+        {
+            for (int y = 0; y < this->arestas; y++)
+            {
                 this->matriz[x][y] = 0;
+            }
+            cout << endl;
+        }
     }    
 } //end init()
 
@@ -93,9 +100,53 @@ void Grafo::printMatriz()
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
 {
-    this->matriz[x][y] = distancia;
-    this->matriz[y][x] = distancia;
+    // if(distancia != 0 && distancia <= this->matriz[x][y])
+    // {
+    //     this->matriz[x][y] = distancia;
+    // }
+
+    // if(distancia != 0 && distancia <= this->matriz[x][y])
+    // {
+    //     this->matriz[y][x] = distancia;
+    // }
+
+    this->matriz[x][y] = 1;
+    this->matriz[y][x] = 1;
+    
 } //end conectarVertices()
+
+/**
+ * Método para registrar adjascência na matriz.
+ */
+void Grafo::conectarVertices(int x, int y)
+{
+    this->matriz[x][y] = 1;
+    this->matriz[y][x] = 1;
+} //end conectarVertices()
+
+/**
+ * Escolher um vértice não visitado x
+ * que tenha distância mínima para o V0
+ * e sendo esta a menor de todas.
+ * 
+ * @return Endereço da menor distância no vetor dentre os vértices não visitados.
+ */
+int Grafo::menorDistancia(int *distancias, bool* visitados)
+{
+    int indexMenor = -1;
+    int menor = infinity;
+
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        if( !visitados[x] && distancias[x] <= menor) 
+        {
+            menor = distancias[x];
+            indexMenor = x;
+        }
+    }    
+    
+    return (indexMenor < 0 || menor == infinity)? -1 : indexMenor;
+}
 
 /**
  * Algoritmo para encontrar o menor caminho entre dois vértices.
@@ -103,7 +154,7 @@ void Grafo::conectarVertices(int x, int y, int distancia)
 int Grafo::djkstra(int inicio, int destino)
 {
     int distancias[this->vertices];
-    bool visitados[this->vertices];
+    bool visitados[this->vertices];  
 
     // Inicializações
     for (size_t x = 0; x < this->vertices; x++)
@@ -113,7 +164,7 @@ int Grafo::djkstra(int inicio, int destino)
     }
     distancias[inicio] = 0;
 
-    for (size_t x = 0; x < this->vertices-1; x++)
+    for (size_t x = 0; x < this->vertices-1; x++) // -1 pois não testamos com o v0
     {
         int menorDistancia = this->menorDistancia(distancias, visitados);
         visitados[menorDistancia] = true;
@@ -123,9 +174,7 @@ int Grafo::djkstra(int inicio, int destino)
             if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
                 distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
             {
-                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-                this->matriz[menorDistancia][y];
-                this->matriz[y][menorDistancia];
+                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];   
             }   
         }    
     }
@@ -133,20 +182,86 @@ int Grafo::djkstra(int inicio, int destino)
     return distancias[destino-1];
 }
 
+/**
+ * Algoritmo para encontrar o menor caminho entre dois vértices.
+ */
+int Grafo::djkstraModificado(int inicio, int destino)
+{
+    int distancias[this->vertices];
+    bool visitados[this->vertices];
+    int maiorCaminho = 0; // Maior caminho dentro do menor caminho    
+
+    // Inicializações
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        distancias[x] = (this->matriz[inicio][x] > 0)? this->matriz[inicio][x] : infinity;
+        visitados[x] = false;
+    }
+    distancias[inicio] = 0;
+
+    for (size_t x = 0; x < this->vertices; x++) // -1 pois não testamos com o vfinal
+    {
+        int idMenorDistancia = this->menorDistancia(distancias, visitados);
+
+        if(idMenorDistancia >= 0)
+        {
+            visitados[idMenorDistancia] = true;
+
+            for (size_t y = 0; y < this->vertices; y++)
+            {
+                // cout << "L: " << idMenorDistancia << " C: " << y << " D: " << this->matriz[idMenorDistancia][y] << endl;
+                if(!visitados[y] && this->matriz[idMenorDistancia][y] > 0 && 
+                    distancias[idMenorDistancia] + this->matriz[idMenorDistancia][y] < distancias[y])
+                {
+                    distancias[y] = distancias[idMenorDistancia] + this->matriz[idMenorDistancia][y];
+
+                    maiorCaminho = (this->matriz[idMenorDistancia][y] > maiorCaminho) ? this->matriz[idMenorDistancia][y] : maiorCaminho;                                             
+                }  
+            }    
+        }
+        else{ x = this->vertices; maiorCaminho = -1; }
+    }
+
+    return maiorCaminho;
+        
+}
+
 
 int main()
 {
     int cidades, estradas;
+    int cidadeA, cidadeB, distancia;
 
-    while(scanf("%d %d", &cidades, &estradas) != EOF)
+    cin >> cidades; cin >> estradas;
+
+    while( !(cidades == 0 && estradas == 0) )
     {
-        Grafo g(cidades, estradas);
-        for (size_t x = 0; x < estradas; x++)
-        {
+        if ( estradas == 0 ) { cout << "IMPOSSIBLE" << endl; }
+        else
+        {            
+            Grafo *g = new Grafo(cidades, estradas);
+            // g->printMatriz();
             
-        }
-        
-    }
+            for (size_t x = 0; x < estradas; x++)
+            {
+                cin >> cidadeA >> cidadeB >> distancia;
+                g->conectarVertices(cidadeA, cidadeB, distancia);
 
+                // cout << "A: " << cidadeA << " B: " << cidadeB << " D: " << distancia << endl;
+            }
+
+        
+            int maiorCaminho = g->djkstraModificado(0, cidades-1);
+
+            if( maiorCaminho >= 0)
+            {
+                cout << maiorCaminho << endl;
+            }
+            else{ cout << "IMPOSSIBLE" << endl; }
+                
+        }        
+
+        cin >> cidades >> estradas;       
+    }
     return 0;
 }

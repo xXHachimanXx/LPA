@@ -1,6 +1,7 @@
 Atualmente, muitas montadoras estão desenvolvendo carros que usam eletricidade
 de gasolina. As baterias usadas nesses
-os carros geralmente são muito pesados ​​e caros; portanto, os projetistas devem fazer uma troca importante ao determinar a capacidade da bateria e, portanto, a faixa de
+os carros geralmente são muito pesados ​​e caros; portanto, os projetistas devem fazer uma 
+troca importante ao determinar a capacidade da bateria e, portanto, a faixa de
 esses veículos. Sua tarefa é ajudar a determinar o intervalo mínimo necessário para
 que é possível que o carro viaje entre duas cidades do continente.
 A rede rodoviária no continente
