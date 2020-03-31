@@ -24,11 +24,13 @@ public:
     int djkstra(int inicio, int destino);
     int djkstraModificado(int inicio, int destino);
     Grafo* floydW();
+    int buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente);
+    int maiorComponente();
+
     void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
     void printMatriz();
     void inicializar(); //inicializador
-    int maiorMenorCaminho();
 
 };
 
@@ -138,38 +140,8 @@ Grafo* Grafo::transpor()
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
 {
-    if(distancia > 0)    
-    {           
-        if(this->matriz[x][y] == -1 && this->matriz[y][x] == -1 )
-        {
-            this->matriz[x][y] = distancia;
-            this->matriz[y][x] = distancia;  
-        }
-        else
-        {
-            int menor = min( min(this->matriz[x][y], this->matriz[y][x]), distancia);
-            this->matriz[x][y] = menor;
-            this->matriz[y][x] = menor;
-
-        }
-    }
-    /*
-       if( this->matriz[x][y] == 0)
-       {
-           if(this->matriz[y][x] == 0)
-           { this->matriz[x][y] = distancia; }
-           else
-           {
-                this->matriz[y][x] = (this->matriz[y][x] > distancia)? distancia : this->matriz[y][x];
-           }
-       }
-       else
-       {
-            this->matriz[x][y] = (this->matriz[x][y] > distancia) ? distancia : this->matriz[x][y];
-       }
-
-    } 
-    */   
+    this->matriz[x][y] = distancia;
+    this->matriz[y][x] = distancia;       
 } //end conectarVertices()
 
 /**
@@ -242,55 +214,6 @@ int Grafo::djkstra(int inicio, int destino)
     return distancias[destino-1];
 }
 
-/**
- * Algoritmo para encontrar o menor caminho entre dois vértices.
- */
-int Grafo::djkstraModificado(int inicio, int destino)
-{
-    int distancias[this->vertices];
-    bool visitados[this->vertices]; 
-    int contador = 0;
-    int m = -1; 
-    // cout << "I: " << inicio << " D: " << destino << endl;
-
-    // Inicializações
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        distancias[x] = (this->matriz[inicio][x] > 0)? this->matriz[inicio][x] : infinity;
-        visitados[x] = false;
-    }
-    distancias[inicio] = 0;
-    m = distancias[inicio+1];
-
-    for (size_t x = 0; x < this->vertices-1; x++) // -1 pois não testamos com o v0
-    {
-        int menorDistancia = this->menorDistancia(distancias, visitados);
-
-        if(menorDistancia >= 0)
-        {
-            visitados[menorDistancia] = true;
-
-            for (size_t y = 0; y < this->vertices; y++)
-            {
-                // cout << " m[" << menorDistancia << "][" << y << "] = " << this->matriz[menorDistancia][y] << endl;
-                // cout << "Maqui: " << m << endl;            
-                if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
-                    distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
-                {
-                    // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
-                    distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-                    m = max(this->matriz[menorDistancia][y], m);
-                }        
-            }
-        }else{ x = this->vertices; m = -1; }
-    }
-
-    // cout << "M: " << m << endl;
-
-    return m;
-}
-
-
 Grafo* Grafo::floydW()
 {
     Grafo* g2 = new Grafo(this->vertices, this->vertices);
@@ -323,30 +246,52 @@ Grafo* Grafo::floydW()
             }
         }        
     }
-    //g2->printMatriz();
-
-    return g2;    
 }
 
-int Grafo::maiorMenorCaminho()
-{
-    int maiorMenorCaminho = -1;
-    int dm = 0;
-
-    for (size_t x = 0; x < this->vertices; x++)
+/**
+ * Busca em Profundidade com contagem de vértices no componente.
+ * OBS.: Começa sempre em 1 pois esta função não conta a primeira visita.
+ */
+int Grafo::buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente)
+{   
+    if(!visitados[v])
     {
-        for (size_t y = x+1; y < this->vertices-1; y++)
-        {
-            dm = this->djkstraModificado(x, y);
-
-            if(dm >= 0)            
-                maiorMenorCaminho = max(maiorMenorCaminho, dm);
-            else
-                x = y = this->vertices, maiorMenorCaminho = -1;
-        }        
+        visitados[v] = true;    
+        tamanhoComponente++;    
     }
+
+
+    for (size_t y = 0; y < this->vertices; y++)
+    {
+        if(!visitados[y] && this->matriz[v][y] == 1) 
+        {
+            tamanhoComponente = buscaEmProfundidade(y, visitados, tamanhoComponente);
+        }
+    }
+    return tamanhoComponente;
+}
+
+int Grafo::maiorComponente()
+{
+    int maior = 0, temp = 0;
+    bool *visitados = new bool[this->vertices]; // Vetor verificador de visitas a vertices
+
+    // Inicializando vetor de visitados como false
+    for (size_t y = 0; y < this->vertices; y++) 
+        visitados[y] = false;
     
-    return maiorMenorCaminho;
+    // Rodar em todos os componentes
+    for (size_t y = 0; y < this->vertices; y++)
+    {               
+        // A função começa com 1 pois esta não conta a primeira visita
+        if(!visitados[y])
+        {
+            temp = buscaEmProfundidade(y, visitados, 0);             
+            maior = (temp >= maior)? temp : maior;
+            temp = 0;
+        }
+    }
+    return maior;
 }
 
 
@@ -354,41 +299,34 @@ int Grafo::maiorMenorCaminho()
 
 int main()
 {
-    int cidades, estradas;
-    int cidadeA, cidadeB, distancia;
+    int saloes, tuneis;
+    int sA, sB, tamanho;    
+    int consultas;
+    int salaoDM; // -> salao que a dona minhoca quer começar
+    int tamanhoDM; // -> tamanho da dona minhoca ( ͡° ͜ʖ ͡°) 
 
-    cin >> cidades; cin >> estradas;
-
-    while( !(cidades == 0 && estradas == 0) )
+    while(scanf("%d %d", &saloes, &tuneis) != EOF)
     {
-        if ( estradas == 0 ) { cout << "IMPOSSIBLE" << endl; }
-        else
-        {            
-            Grafo *g = new Grafo(cidades, cidades);            
-            Grafo *g2;
+        Grafo g(saloes, tuneis);
 
-            for (size_t x = 0; x < estradas; x++)
-            {
-                cin >> cidadeA >> cidadeB >> distancia;
-                g->conectarVertices(cidadeA, cidadeB, distancia);
+        // Conectar grafo
+        for (size_t x = 0; x < tuneis; x++)
+        {
+            cin >> sA; cin >> sB; cin >> tamanho;            
+            g.conectarVertices(sA-1, sB-1, tamanho);
+        }
 
-                // cout << "A: " << cidadeA << " B: " << cidadeB << " D: " << distancia << endl;
-            }
-            
-            // g->printMatriz();
-            
-            int maiorCaminho = g->maiorMenorCaminho();
+        g.printMatriz();
 
-            // cout << "A: " << maiorCaminho << " B: " << maiorCaminho2 << endl;            
-
-            if( maiorCaminho < infinity && maiorCaminho > 0 )
-            {
-                cout << maiorCaminho << endl;
-            }
-            else{ cout << "IMPOSSIBLE" << endl; }
-                
-        }        
-        cin >> cidades >> estradas;       
+        // Fazer consultas
+        cin >> consultas;
+        for (size_t y = 0; y < consultas; y++)
+        {
+            cin >> salaoDM; cin >> tamanhoDM;
+        }    
     }
+
+
+
     return 0;
 }
