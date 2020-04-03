@@ -29,6 +29,7 @@ public:
 
     void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
+    void conectarVerticesD(int v1, int v2, int distancia);
     void printMatriz();
     void inicializar(); //inicializador
 
@@ -142,7 +143,15 @@ void Grafo::conectarVertices(int x, int y, int distancia)
 {
     this->matriz[x][y] = distancia;
     this->matriz[y][x] = distancia;       
-} //end conectarVertices()
+}
+
+/**
+ * Método para registrar adjascência na matriz de grafo direcionado.
+ */
+void Grafo::conectarVerticesD(int x, int y, int distancia)
+{
+    this->matriz[x][y] = distancia;
+} //end conectarVertices() //end conectarVertices()
 
 /**
  * Método para registrar adjascência na matriz.
