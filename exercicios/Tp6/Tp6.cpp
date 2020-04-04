@@ -5,31 +5,31 @@
 #define infinity 1000000
 
 using namespace std;
+int cu = infinity;
+int inicioCiclo = -1;
 
 class Grafo
 {
-private:
+public:
     int vertices;
     int arestas;
     int **matriz;
     int menorDistancia(int *distancias, bool *visitados);
+    int tamanhoDM;
+    Grafo* menoresCaminhos;
+    int *pais;
+    int *dist;
+
 
 public:
     ~Grafo(); //Destrutor
     Grafo();  //construtor
     Grafo(int vertices, int arestas);
     Grafo* clone();
-    Grafo* transpor(); //transpor matriz do grafo
-
-    int djkstra(int inicio, int destino);
-    int djkstraModificado(int inicio, int destino);
     Grafo* floydW();
-    int buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente);
-    int maiorComponente();
+    int buscaEmProfundidade(int inicio, int v, bool visitados[], int tamanhoComponente, int tamanhoDM);    
 
-    void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
-    void conectarVerticesD(int v1, int v2, int distancia);
     void printMatriz();
     void inicializar(); //inicializador
 
@@ -76,10 +76,19 @@ void Grafo::inicializar()
         {
             for (int y = 0; y < this->arestas; y++)
             {
-                this->matriz[x][y] = -1;
+                this->matriz[x][y] = 0;
             }
         }
     }    
+
+    this->pais = new int[vertices+1];
+    this->dist = new int[vertices+1];
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        this->pais[x] = 0;
+        this->dist[x] = 0;
+    }
+    
 } //end init()
 
 void Grafo::printMatriz()
@@ -92,7 +101,7 @@ void Grafo::printMatriz()
             {
                 cout << matriz[x][y] << " ";
             }
-            cout << "" << endl;
+            cout << endl;
         }
         cout << endl;
     }
@@ -120,22 +129,6 @@ Grafo* Grafo::clone()
     return g;
 }
 
-Grafo* Grafo::transpor()
-{
-    Grafo* gt = this->clone();
-
-    //o que é linha vira coluna
-    for(int x = 0; x < this->vertices; x++)
-    {
-        for(int y = 0; y < this->vertices; y++)
-        {            
-            gt->matriz[x][y] = this->matriz[y][x];
-        }
-    }
-
-    return gt;
-}
-
 /**
  * Método para registrar adjascência na matriz.
  */
@@ -143,84 +136,6 @@ void Grafo::conectarVertices(int x, int y, int distancia)
 {
     this->matriz[x][y] = distancia;
     this->matriz[y][x] = distancia;       
-}
-
-/**
- * Método para registrar adjascência na matriz de grafo direcionado.
- */
-void Grafo::conectarVerticesD(int x, int y, int distancia)
-{
-    this->matriz[x][y] = distancia;
-} //end conectarVertices() //end conectarVertices()
-
-/**
- * Método para registrar adjascência na matriz.
- */
-void Grafo::conectarVertices(int x, int y)
-{
-    this->matriz[x][y] = 1;
-    this->matriz[y][x] = 1;
-} //end conectarVertices()
-
-/**
- * Escolher um vértice não visitado x
- * que tenha distância mínima para o V0
- * e sendo esta a menor de todas.
- * 
- * @return Endereço da menor distância no vetor dentre os vértices não visitados.
- */
-int Grafo::menorDistancia(int *distancias, bool* visitados)
-{
-    int indexMenor = -1;
-    int menor = infinity;
-
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        if( !visitados[x] && distancias[x] <= menor ) 
-        {
-            menor = distancias[x];
-            indexMenor = x;
-        }
-    }    
-    
-    // cout << "CUUU" << indexMenor << endl;
-    return indexMenor;
-}
-
-/**
- * Algoritmo para encontrar o menor caminho entre dois vértices.
- */
-int Grafo::djkstra(int inicio, int destino)
-{
-    int distancias[this->vertices];
-    bool visitados[this->vertices];  
-
-    // Inicializações
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        distancias[x] = (this->matriz[inicio][x] > 0)? this->matriz[inicio][x] : infinity;
-        visitados[x] = false;
-    }
-    distancias[inicio] = 0;
-
-    for (size_t x = 0; x < this->vertices-1; x++) // -1 pois não testamos com o v0
-    {
-        int menorDistancia = this->menorDistancia(distancias, visitados);
-
-        visitados[menorDistancia] = true;
-
-        for (size_t y = 0; y < this->vertices; y++)
-        {
-            if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
-                distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
-            {
-                // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
-                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];   
-            }   
-        }    
-    }
-
-    return distancias[destino-1];
 }
 
 Grafo* Grafo::floydW()
@@ -231,8 +146,7 @@ Grafo* Grafo::floydW()
     {
         for (size_t y = 0; y < this->vertices; y++)
         {
-            //g2->matriz[x][y]
-            if(x == y){ g2->matriz[x][y]; }
+            if(x == y){ g2->matriz[x][y] = 0; }
             else
             {
                 if( this->matriz[x][y] > 0 )
@@ -243,68 +157,76 @@ Grafo* Grafo::floydW()
         }        
     }
     
-    int m = -1;
     for (size_t x = 0; x < this->vertices; x++)
     {
         for (size_t y = 0; y < this->vertices; y++)
         {
             for (size_t z = 0; z < this->vertices; z++)
             {
-                // g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);
                 g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);                
             }
         }        
     }
+
+    this->menoresCaminhos = g2;
+
+    return g2;
 }
+
 
 /**
  * Busca em Profundidade com contagem de vértices no componente.
  * OBS.: Começa sempre em 1 pois esta função não conta a primeira visita.
  */
-int Grafo::buscaEmProfundidade(int v, bool visitados[], int tamanhoComponente)
-{   
-    if(!visitados[v])
-    {
-        visitados[v] = true;    
-        tamanhoComponente++;    
-    }
-
+int Grafo::buscaEmProfundidade(int inicio, int v, bool visitados[], int tamanhoCiclo, int tamanhoDM)
+{
+    visitados[v] = true;
 
     for (size_t y = 0; y < this->vertices; y++)
     {
-        if(!visitados[y] && this->matriz[v][y] == 1) 
+        if (y != inicioCiclo && pais[v] != y && y != inicio)
         {
-            tamanhoComponente = buscaEmProfundidade(y, visitados, tamanhoComponente);
+            if(!visitados[y] && this->matriz[v][y] > 0)
+            {
+                pais[y] = v;
+                // dist[y] = dist[v] + this->matriz[v][y];
+                tamanhoCiclo = tamanhoCiclo + this->matriz[v][y];
+                buscaEmProfundidade(inicio, y, visitados, tamanhoCiclo, tamanhoDM);
+            }
+            else
+            {        
+                inicioCiclo = y;     
+                cout << "inicioCiclo = " << inicioCiclo << endl;
+                // cout << "Bucetaaaa = " << tamanhoCiclo + this->matriz[v][y] << endl;            
+                if(  tamanhoCiclo + this->matriz[v][y] > tamanhoDM)
+                {
+                    cout << " v: " << v << " y: " << y << " pais[v] = " << pais[v] << " Menor: " << tamanhoCiclo + this->matriz[v][y] + menoresCaminhos->matriz[y][inicio] << endl;
+                    cu = min(cu, tamanhoCiclo + this->matriz[v][y] + menoresCaminhos->matriz[inicioCiclo][inicio]);                                    
+                }
+            }
         }
-    }
-    return tamanhoComponente;
+    }// end for
+    
+    return tamanhoCiclo;
 }
 
-int Grafo::maiorComponente()
+int caminhoDaMinhoca( int salaoDM, int tamanhoDM, Grafo* g )
 {
-    int maior = 0, temp = 0;
-    bool *visitados = new bool[this->vertices]; // Vetor verificador de visitas a vertices
+    int menor = -1;
+    bool *visitados = new bool[g->vertices]; // Vetor verificador de visitas a vertices
 
     // Inicializando vetor de visitados como false
-    for (size_t y = 0; y < this->vertices; y++) 
+    for (size_t y = 0; y < g->vertices; y++)
+    {
         visitados[y] = false;
-    
-    // Rodar em todos os componentes
-    for (size_t y = 0; y < this->vertices; y++)
-    {               
-        // A função começa com 1 pois esta não conta a primeira visita
-        if(!visitados[y])
-        {
-            temp = buscaEmProfundidade(y, visitados, 0);             
-            maior = (temp >= maior)? temp : maior;
-            temp = 0;
-        }
+        g->pais[y] = 0;
     }
-    return maior;
+    g->pais[g->vertices] = 0;
+
+    menor = g->buscaEmProfundidade(salaoDM, salaoDM, visitados, 0, tamanhoDM);
+
+    return menor;
 }
-
-
-
 
 int main()
 {
@@ -312,30 +234,32 @@ int main()
     int sA, sB, tamanho;    
     int consultas;
     int salaoDM; // -> salao que a dona minhoca quer começar
-    int tamanhoDM; // -> tamanho da dona minhoca ( ͡° ͜ʖ ͡°) 
+    int tamanhoDM; // -> salao que a dona minhoca quer começar
 
     while(scanf("%d %d", &saloes, &tuneis) != EOF)
     {
-        Grafo g(saloes, tuneis);
+        Grafo* g = new Grafo(saloes, tuneis);
 
         // Conectar grafo
         for (size_t x = 0; x < tuneis; x++)
         {
             cin >> sA; cin >> sB; cin >> tamanho;            
-            g.conectarVertices(sA-1, sB-1, tamanho);
+            g->conectarVertices(sA-1, sB-1, tamanho);
         }
 
-        g.printMatriz();
+        g->floydW(); // Gerar matriz de menores caminhos        
 
         // Fazer consultas
         cin >> consultas;
         for (size_t y = 0; y < consultas; y++)
         {
             cin >> salaoDM; cin >> tamanhoDM;
+            caminhoDaMinhoca(salaoDM-1, tamanhoDM, g);
+            cout <<  cu << endl;
+            cu = infinity;
+            inicioCiclo = -1;
         }    
     }
-
-
 
     return 0;
 }
