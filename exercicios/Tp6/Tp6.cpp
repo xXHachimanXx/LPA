@@ -5,8 +5,7 @@
 #define infinity 1000000
 
 using namespace std;
-int cu = infinity;
-int inicioCiclo = -1;
+int resp = infinity;
 
 class Grafo
 {
@@ -55,6 +54,8 @@ Grafo::Grafo(int vertices, int arestas)
     this->vertices = vertices;
     this->arestas = arestas;
     this->matriz = new int *[vertices];
+    this->pais = new int[vertices+1];
+    this->dist = new int[vertices+1];
 
     for (int y = 0; y < vertices; y++)
     {
@@ -80,14 +81,6 @@ void Grafo::inicializar()
             }
         }
     }    
-
-    this->pais = new int[vertices+1];
-    this->dist = new int[vertices+1];
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        this->pais[x] = 0;
-        this->dist[x] = 0;
-    }
     
 } //end init()
 
@@ -173,7 +166,6 @@ Grafo* Grafo::floydW()
     return g2;
 }
 
-
 /**
  * Busca em Profundidade com contagem de vértices no componente.
  * OBS.: Começa sempre em 1 pois esta função não conta a primeira visita.
@@ -184,48 +176,50 @@ int Grafo::buscaEmProfundidade(int inicio, int v, bool visitados[], int tamanhoC
 
     for (size_t y = 0; y < this->vertices; y++)
     {
-        if (y != inicioCiclo && pais[v] != y && y != inicio)
+        if( pais[v] == y || y == v || this->matriz[v][y] <= 0 ) // Se não foi visitado e tem aresta faça
+        { continue; }
+
+        if ( !visitados[y] )
         {
-            if(!visitados[y] && this->matriz[v][y] > 0)
-            {
-                pais[y] = v;
-                // dist[y] = dist[v] + this->matriz[v][y];
-                tamanhoCiclo = tamanhoCiclo + this->matriz[v][y];
-                buscaEmProfundidade(inicio, y, visitados, tamanhoCiclo, tamanhoDM);
-            }
-            else
-            {        
-                inicioCiclo = y;     
-                cout << "inicioCiclo = " << inicioCiclo << endl;
-                // cout << "Bucetaaaa = " << tamanhoCiclo + this->matriz[v][y] << endl;            
-                if(  tamanhoCiclo + this->matriz[v][y] > tamanhoDM)
-                {
-                    cout << " v: " << v << " y: " << y << " pais[v] = " << pais[v] << " Menor: " << tamanhoCiclo + this->matriz[v][y] + menoresCaminhos->matriz[y][inicio] << endl;
-                    cu = min(cu, tamanhoCiclo + this->matriz[v][y] + menoresCaminhos->matriz[inicioCiclo][inicio]);                                    
-                }
-            }
+            pais[y] = v;
+            dist[y] = dist[v] + this->matriz[v][y];
+            buscaEmProfundidade(inicio, y, visitados, tamanhoCiclo, tamanhoDM);
         }
+
+        // A ideia no seguinte 'if' é saber se a minhoca cabe no ciclo, então
+        // fazemos dist[v] + this->matriz[v][y] - dist[y] para pegar o tamanho
+        // dele e comparamos com o tamanho da minhoca.
+        int tamanhoCiclo = dist[v] + this->matriz[v][y] - dist[y];
+
+        if( visitados[y] && dist[v] + this->matriz[v][y] - dist[y] >= tamanhoDM )
+        {
+            // Como já temos o tamanho do ciclo que cabe a minhoca, então, basta 
+            // calcular a menor rota de ida e volta do ciclo ( 2 * menoresCaminhos->matriz[y][inicio] )
+            // e somar com o tamanho do ciclo
+            resp = min(resp, tamanhoCiclo + (2 * menoresCaminhos->matriz[y][inicio]) );
+        }
+                
     }// end for
+
     
     return tamanhoCiclo;
 }
 
-int caminhoDaMinhoca( int salaoDM, int tamanhoDM, Grafo* g )
+void caminhoDaMinhoca( int salaoDM, int tamanhoDM, Grafo* g )
 {
     int menor = -1;
     bool *visitados = new bool[g->vertices]; // Vetor verificador de visitas a vertices
 
-    // Inicializando vetor de visitados como false
+    // Inicializando vetor auxiliares
     for (size_t y = 0; y < g->vertices; y++)
     {
         visitados[y] = false;
         g->pais[y] = 0;
+        g->dist[y] = 0;   
     }
-    g->pais[g->vertices] = 0;
 
-    menor = g->buscaEmProfundidade(salaoDM, salaoDM, visitados, 0, tamanhoDM);
+    g->buscaEmProfundidade(salaoDM, salaoDM, visitados, 0, tamanhoDM);
 
-    return menor;
 }
 
 int main()
@@ -254,10 +248,14 @@ int main()
         for (size_t y = 0; y < consultas; y++)
         {
             cin >> salaoDM; cin >> tamanhoDM;
-            caminhoDaMinhoca(salaoDM-1, tamanhoDM, g);
-            cout <<  cu << endl;
-            cu = infinity;
-            inicioCiclo = -1;
+            caminhoDaMinhoca(salaoDM-1, tamanhoDM, g); // Encontrar caminho da minhoca
+
+            if(resp == infinity)
+                cout << -1 << endl;
+            else
+                cout <<  resp << endl;
+
+            resp = infinity;
         }    
     }
 
