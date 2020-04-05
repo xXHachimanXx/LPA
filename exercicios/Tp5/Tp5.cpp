@@ -2,7 +2,7 @@
 #include <iostream>
 #include <limits.h>
 
-#define infinity INT_MAX
+#define infinity 1000000
 
 using namespace std;
 
@@ -23,10 +23,13 @@ public:
 
     int djkstra(int inicio, int destino);
     int djkstraModificado(int inicio, int destino);
+    Grafo* floydW();
     void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
     void printMatriz();
     void inicializar(); //inicializador
+    int maiorMenorCaminho();
+
 };
 
 /**
@@ -70,7 +73,7 @@ void Grafo::inicializar()
         {
             for (int y = 0; y < this->arestas; y++)
             {
-                this->matriz[x][y] = 0;
+                this->matriz[x][y] = -1;
             }
         }
     }    
@@ -135,27 +138,38 @@ Grafo* Grafo::transpor()
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
 {
-    if(distancia > 0)
-    {
-        if(this->matriz[x][y] == 0)
+    if(distancia > 0)    
+    {           
+        if(this->matriz[x][y] == -1 && this->matriz[y][x] == -1 )
         {
-            if( this->matriz[y][x] == 0 )
-            { 
-                this->matriz[x][y] = distancia; 
-            }
-            else
-            {
-                this->matriz[y][x] = (this->matriz[y][x] > distancia)? distancia : this->matriz[y][x];
-            }
+            this->matriz[x][y] = distancia;
+            this->matriz[y][x] = distancia;  
         }
         else
         {
+            int menor = min( min(this->matriz[x][y], this->matriz[y][x]), distancia);
+            this->matriz[x][y] = menor;
+            this->matriz[y][x] = menor;
+
+        }
+    }
+    /*
+       if( this->matriz[x][y] == 0)
+       {
+           if(this->matriz[y][x] == 0)
+           { this->matriz[x][y] = distancia; }
+           else
+           {
+                this->matriz[y][x] = (this->matriz[y][x] > distancia)? distancia : this->matriz[y][x];
+           }
+       }
+       else
+       {
             this->matriz[x][y] = (this->matriz[x][y] > distancia) ? distancia : this->matriz[x][y];
-        }        
-        
-                
-    }    
-    
+       }
+
+    } 
+    */   
 } //end conectarVertices()
 
 /**
@@ -181,14 +195,15 @@ int Grafo::menorDistancia(int *distancias, bool* visitados)
 
     for (size_t x = 0; x < this->vertices; x++)
     {
-        if( !visitados[x] && distancias[x] <= menor) 
+        if( !visitados[x] && distancias[x] <= menor ) 
         {
             menor = distancias[x];
             indexMenor = x;
         }
     }    
     
-    return (indexMenor < 0 || menor == infinity)? -1 : indexMenor;
+    // cout << "CUUU" << indexMenor << endl;
+    return indexMenor;
 }
 
 /**
@@ -210,6 +225,7 @@ int Grafo::djkstra(int inicio, int destino)
     for (size_t x = 0; x < this->vertices-1; x++) // -1 pois não testamos com o v0
     {
         int menorDistancia = this->menorDistancia(distancias, visitados);
+
         visitados[menorDistancia] = true;
 
         for (size_t y = 0; y < this->vertices; y++)
@@ -217,6 +233,7 @@ int Grafo::djkstra(int inicio, int destino)
             if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
                 distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
             {
+                // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
                 distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];   
             }   
         }    
@@ -231,8 +248,10 @@ int Grafo::djkstra(int inicio, int destino)
 int Grafo::djkstraModificado(int inicio, int destino)
 {
     int distancias[this->vertices];
-    bool visitados[this->vertices];
-    int maiorCaminho = 0; // Maior caminho dentro do menor caminho    
+    bool visitados[this->vertices]; 
+    int contador = 0;
+    int m = -1; 
+    // cout << "I: " << inicio << " D: " << destino << endl;
 
     // Inicializações
     for (size_t x = 0; x < this->vertices; x++)
@@ -241,32 +260,96 @@ int Grafo::djkstraModificado(int inicio, int destino)
         visitados[x] = false;
     }
     distancias[inicio] = 0;
+    m = distancias[inicio+1];
 
-    for (size_t x = 0; x < this->vertices; x++) // -1 pois não testamos com o vfinal
+    for (size_t x = 0; x < this->vertices-1; x++) // -1 pois não testamos com o v0
     {
-        int idMenorDistancia = this->menorDistancia(distancias, visitados);
+        int menorDistancia = this->menorDistancia(distancias, visitados);
 
-        if(idMenorDistancia >= 0)
+        if(menorDistancia >= 0)
         {
-            visitados[idMenorDistancia] = true;
+            visitados[menorDistancia] = true;
 
             for (size_t y = 0; y < this->vertices; y++)
             {
-                cout << "L: " << idMenorDistancia << " C: " << y << " D: " << this->matriz[idMenorDistancia][y] << endl;
-                if(!visitados[y] && this->matriz[idMenorDistancia][y] > 0 && 
-                    distancias[idMenorDistancia] + this->matriz[idMenorDistancia][y] < distancias[y])
+                // cout << " m[" << menorDistancia << "][" << y << "] = " << this->matriz[menorDistancia][y] << endl;
+                // cout << "Maqui: " << m << endl;            
+                if(!visitados[y] && this->matriz[menorDistancia][y] > 0 && 
+                    distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
                 {
-                    distancias[y] = distancias[idMenorDistancia] + this->matriz[idMenorDistancia][y];                    
-                    maiorCaminho = (this->matriz[idMenorDistancia][y] > maiorCaminho) ? this->matriz[idMenorDistancia][y] : maiorCaminho;                                             
-                }  
-            }    
-        }
-        else{ x = this->vertices; maiorCaminho = -1; }
+                    // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
+                    distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
+                    m = max(this->matriz[menorDistancia][y], m);
+                }        
+            }
+        }else{ x = this->vertices; m = -1; }
     }
 
-    return maiorCaminho;
-        
+    // cout << "M: " << m << endl;
+
+    return m;
 }
+
+
+Grafo* Grafo::floydW()
+{
+    Grafo* g2 = new Grafo(this->vertices, this->vertices);
+
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        for (size_t y = 0; y < this->vertices; y++)
+        {
+            //g2->matriz[x][y]
+            if(x == y){ g2->matriz[x][y]; }
+            else
+            {
+                if( this->matriz[x][y] > 0 )
+                    g2->matriz[x][y] = this->matriz[x][y];
+                else
+                    g2->matriz[x][y] = infinity;
+            }
+        }        
+    }
+    
+    int m = -1;
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        for (size_t y = 0; y < this->vertices; y++)
+        {
+            for (size_t z = 0; z < this->vertices; z++)
+            {
+                // g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);
+                g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);                
+            }
+        }        
+    }
+    //g2->printMatriz();
+
+    return g2;    
+}
+
+int Grafo::maiorMenorCaminho()
+{
+    int maiorMenorCaminho = -1;
+    int dm = 0;
+
+    for (size_t x = 0; x < this->vertices; x++)
+    {
+        for (size_t y = x+1; y < this->vertices-1; y++)
+        {
+            dm = this->djkstraModificado(x, y);
+
+            if(dm >= 0)            
+                maiorMenorCaminho = max(maiorMenorCaminho, dm);
+            else
+                x = y = this->vertices, maiorMenorCaminho = -1;
+        }        
+    }
+    
+    return maiorMenorCaminho;
+}
+
+
 
 
 int main()
@@ -281,8 +364,9 @@ int main()
         if ( estradas == 0 ) { cout << "IMPOSSIBLE" << endl; }
         else
         {            
-            Grafo *g = new Grafo(cidades, cidades);
-            
+            Grafo *g = new Grafo(cidades, cidades);            
+            Grafo *g2;
+
             for (size_t x = 0; x < estradas; x++)
             {
                 cin >> cidadeA >> cidadeB >> distancia;
@@ -290,28 +374,20 @@ int main()
 
                 // cout << "A: " << cidadeA << " B: " << cidadeB << " D: " << distancia << endl;
             }
-            Grafo *gt = g->transpor();
-            gt->printMatriz();
-            g->printMatriz();
-        
-            int maiorCaminho = g->djkstraModificado(0, cidades-1);  
-            cout << "bayusyvgfas" << endl;
-            int maiorCaminho2 = gt->djkstraModificado(0, cidades-1);
+            
+            // g->printMatriz();
+            
+            int maiorCaminho = g->maiorMenorCaminho();
 
-            cout << "A: " << maiorCaminho << " B: " << maiorCaminho2 << endl;
+            // cout << "A: " << maiorCaminho << " B: " << maiorCaminho2 << endl;            
 
-            if( maiorCaminho >= 0 && maiorCaminho >= 0)
+            if( maiorCaminho < infinity && maiorCaminho > 0 )
             {
-                if (maiorCaminho < maiorCaminho2)                
-                    cout << maiorCaminho << endl;
-                else
-                    cout << maiorCaminho2 << endl;
-  
+                cout << maiorCaminho << endl;
             }
             else{ cout << "IMPOSSIBLE" << endl; }
                 
         }        
-
         cin >> cidades >> estradas;       
     }
     return 0;
