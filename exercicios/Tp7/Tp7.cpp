@@ -7,7 +7,17 @@
 
 using namespace std;
 
-ull fatorial(int tamanhoStr)
+void printAlfa()
+{
+    for (size_t x = 0; x < 26; x++)
+    {
+        cout << (char)(x + 97) << " ";
+    }
+
+    cout << endl;
+}
+
+int fatorial(int tamanhoStr)
 {
     if (tamanhoStr > 1)
     {
@@ -18,14 +28,14 @@ ull fatorial(int tamanhoStr)
 }
 
 // to lowerCase e tirar 97
-long quantidadeDeSubstrings(string str)
+int permutaString(string str)
 {
-    long quantidade = 0;
     int numChars = 26;
     int asciiDiff = 97;
     int repeticoes[numChars];
     int tamanhoStr = str.length();
-    int denominador = 1;
+    ull denominador = 1;
+    ull quantidade = 1;
 
     // Inicializar vetor de repeticoes
     for (size_t x = 0; x < numChars; x++)
@@ -41,23 +51,38 @@ long quantidadeDeSubstrings(string str)
 
     for (size_t y = 0; y < numChars; y++)
     {
-        if (y > 0)
+        if (repeticoes[y] > 1)
         {
-            denominador *= fatorial(repeticoes[y]);
+            denominador = denominador * fatorial(repeticoes[y]);
         }
     }
 
-    return quantidade;
+    return quantidade / denominador;
 }
 
-void printAlfa()
+int numSubstrings(string str)
 {
-    for (size_t x = 0; x < 26; x++)
+    int tamString = str.length();
+    ull permutacoes = str.length();
+
+    for (size_t x = tamString; x > 1; x--)
     {
-        cout << (char)(x + 97) << " ";
+        string aux = str;
+        int tamAux = aux.length();
+
+        for (size_t y = tamAux; y > 1; y--)
+        {
+            // cout << "AUX: " << aux << endl;
+            permutacoes += permutaString(aux);
+            aux.erase((y-1), 1);
+        }
+
+        // cout << endl;
+        // cout << "STR: " << str << endl;
+        str.erase((x-1), 1);
     }
 
-    cout << endl;
+    return permutacoes;
 }
 
 int main()
@@ -68,15 +93,11 @@ int main()
 
     cin >> casos;
 
-    printAlfa();
-
     for (size_t x = 0; x < casos; x++)
     {
         cin >> str1 >> str2;
-        substringsStr1 = quantidadeDeSubstrings(str1);
-        substringsStr2 = quantidadeDeSubstrings(str2);        
 
-        if (substringsStr1 == substringsStr2)
+        if (numSubstrings(str1) == numSubstrings(str2))
             cout << 's' << endl;
         else
             cout << 'n' << endl;
@@ -92,4 +113,7 @@ for (size_t x = 0; x < numChars; x++)
     cout << repeticoes[x] << " ";
 }
 cout << endl;
+
+
+        
 */
