@@ -117,39 +117,3 @@ int main()
 
     return 0;
 }
-
-// Se o número de permutações for ímpar(ou 0), Marcelo vence, senão, Carlos vence
-
-
-/*
-// Se esgotou o tamanho da lista de esquerda
-        // "Pilha de cartas" está ao contrário
-        if (x >= tamEsq)
-        {
-            sequencia[z] = dir[y], y++;
-        }
-        else
-        {
-            // Se esgotou o tamanho da lista da direita
-            // "Pilha de cartas" ordenada
-            if (y >= tamDir)
-            {
-                sequencia[z] = esq[x], x++;
-            }
-            else
-            {
-                if (esq[x] < dir[y])
-                    sequencia[z] = esq[x], x++;
-                else
-                    sequencia[z] = dir[y], y++;
-            }
-
-        } //endif
-
-        cout << "Sequencia: ";
-        for (size_t i = 0; i < n; i++)
-        {
-            cout << sequencia[i] << " ";
-        }
-        cout << endl;
-*/
