@@ -60,6 +60,7 @@ int maiorCompra(int tipoDeRoupa, int grana, Memoria* custo, Memoria* memoria)
         {
             if(memoria->matriz[grana][tipoDeRoupa] == -1)
             {
+                // Começa de 1 para não pegar a coluna com o tamanhos linha de tipos
                 for (int modelo = 1; modelo <= custo->matriz[tipoDeRoupa][0]; modelo++)
                 {
                     maiorValor = max(maiorValor, maiorCompra(tipoDeRoupa+1, (grana - custo->matriz[tipoDeRoupa][modelo]), custo, memoria));
