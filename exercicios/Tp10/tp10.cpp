@@ -44,6 +44,11 @@ private:
     }
 };
 
+int compras(int grana, Memoria* mem)
+{
+    
+}
+
 int main()
 {
     int casos = 0;
@@ -58,7 +63,9 @@ int main()
     {
         // Ler grana e roupas
         scanf("%d %d", &grana, &modelos);
-        Memoria* mem = new Memoria(20, 20);
+
+        // Como o stok dos modelos é variável então vamos alocar o máximo de memoria possivel
+        Memoria* mem = new Memoria(20, 20); 
         int* stokDeCadaModelo = new int[modelos];
 
         // Ler roupas disponíveis
