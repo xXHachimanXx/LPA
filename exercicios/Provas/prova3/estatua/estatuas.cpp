@@ -3,22 +3,23 @@
 #include <string.h>
 #include <limits.h>
 
-#define maxsize 1000000
+#define infinito 1000000
 
 using namespace std;
 
 int minimoDeBlocos(int tiposDisponiveis[], int quantidadeDeTipos, int comprimentoDesejado)
 {
-    int cost[comprimentoDesejado];
-    int quantidade = 0;
+    int cost[comprimentoDesejado+1];
+
+    for (int x = 0; x < comprimentoDesejado + 1; x++)
+        cost[x] = infinito;
+
     cost[0] = 0;
-
-    for (int x = 1; x < comprimentoDesejado + 1; x++)
-        cost[x] = maxsize;
-
+    
     for (int x = 0; x < quantidadeDeTipos; x++)
-        for (int y = 0; y <= comprimentoDesejado; y++)
-            cost[y] = min(cost[y], cost[y - tiposDisponiveis[x]] + 1);
+        for (int y = 1; y <= comprimentoDesejado; y++)
+            if(tiposDisponiveis[x] <= y && cost[y - tiposDisponiveis[x]] != infinito)
+                    cost[y] = min(cost[y], cost[y - tiposDisponiveis[x]] + 1);
 
     return cost[comprimentoDesejado];
 }
@@ -38,7 +39,7 @@ int main()
         for (int y = 0; y < quantidadeDeTipos; y++)
             scanf("%d", &tiposDisponiveis[y]);
 
-        printf("%d \n", minimoDeBlocos(tiposDisponiveis, quantidadeDeTipos, comprimentoDesejado));
+        printf("%d\n", minimoDeBlocos(tiposDisponiveis, quantidadeDeTipos, comprimentoDesejado));
     }
 
     return 0;
