@@ -3,12 +3,13 @@
 #include <limits.h>
 
 #define infinity 1000000
+#define infinito INT32_MAX
 
 using namespace std;
 
 class Grafo
 {
-private:
+public:
     int vertices;
     int arestas;
     int **matriz;
@@ -23,7 +24,7 @@ public:
 
     int djkstra(int inicio, int destino);
     int djkstraModificado(int inicio, int destino);
-    Grafo *floydW();
+    void floydW();
     void conectarVertices(int x, int y);
     void conectarVertices(int v1, int v2, int distancia);
     void printMatriz();
@@ -76,6 +77,13 @@ void Grafo::inicializar()
             }
         }
     }
+
+    for (size_t x = 0; x < this->vertices; x++)
+        for (size_t y = 0; y < this->vertices; y++)
+            this->matriz[x][y] = infinity;
+
+    for (size_t x = 0; x < this->vertices; x++)
+        this->matriz[x][x] = 0;
 } //end init()
 
 void Grafo::printMatriz()
@@ -137,168 +145,13 @@ Grafo *Grafo::transpor()
  */
 void Grafo::conectarVertices(int x, int y, int distancia)
 {
-    if (distancia > 0)
-    {
-        if (this->matriz[x][y] == -1 && this->matriz[y][x] == -1)
-        {
-            this->matriz[x][y] = distancia;
-            this->matriz[y][x] = distancia;
-        }
-        else
-        {
-            int menor = min(min(this->matriz[x][y], this->matriz[y][x]), distancia);
-            this->matriz[x][y] = menor;
-            this->matriz[y][x] = menor;
-        }
-    }
+    this->matriz[x][y] = distancia;
+    this->matriz[y][x] = distancia;
+
 } //end conectarVertices()
 
-/**
- * Método para registrar adjascência na matriz.
- */
-void Grafo::conectarVertices(int x, int y)
+void Grafo::floydW()
 {
-    this->matriz[x][y] = 1;
-    this->matriz[y][x] = 1;
-} //end conectarVertices()
-
-/**
- * Escolher um vértice não visitado x
- * que tenha distância mínima para o V0
- * e sendo esta a menor de todas.
- * 
- * @return Endereço da menor distância no vetor dentre os vértices não visitados.
- */
-int Grafo::menorDistancia(int *distancias, bool *visitados)
-{
-    int indexMenor = -1;
-    int menor = infinity;
-
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        if (!visitados[x] && distancias[x] <= menor)
-        {
-            menor = distancias[x];
-            indexMenor = x;
-        }
-    }
-
-    // cout << "CUUU" << indexMenor << endl;
-    return indexMenor;
-}
-
-/**
- * Algoritmo para encontrar o menor caminho entre dois vértices.
- */
-int Grafo::djkstra(int inicio, int destino)
-{
-    int distancias[this->vertices];
-    bool visitados[this->vertices];
-
-    // Inicializações
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        distancias[x] = (this->matriz[inicio][x] > 0) ? this->matriz[inicio][x] : infinity;
-        visitados[x] = false;
-    }
-    distancias[inicio] = 0;
-
-    for (size_t x = 0; x < this->vertices - 1; x++) // -1 pois não testamos com o v0
-    {
-        int menorDistancia = this->menorDistancia(distancias, visitados);
-
-        visitados[menorDistancia] = true;
-
-        for (size_t y = 0; y < this->vertices; y++)
-        {
-            if (!visitados[y] && this->matriz[menorDistancia][y] > 0 &&
-                distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
-            {
-                // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
-                distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-            }
-        }
-    }
-
-    return distancias[destino - 1];
-}
-
-/**
- * Algoritmo para encontrar o menor caminho entre dois vértices.
- */
-int Grafo::djkstraModificado(int inicio, int destino)
-{
-    int distancias[this->vertices];
-    bool visitados[this->vertices];
-    int contador = 0;
-    int m = -1;
-    // cout << "I: " << inicio << " D: " << destino << endl;
-
-    // Inicializações
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        distancias[x] = (this->matriz[inicio][x] > 0) ? this->matriz[inicio][x] : infinity;
-        visitados[x] = false;
-    }
-    distancias[inicio] = 0;
-    m = distancias[inicio + 1];
-
-    for (size_t x = 0; x < this->vertices - 1; x++) // -1 pois não testamos com o v0
-    {
-        int menorDistancia = this->menorDistancia(distancias, visitados);
-
-        if (menorDistancia >= 0)
-        {
-            visitados[menorDistancia] = true;
-
-            for (size_t y = 0; y < this->vertices; y++)
-            {
-                // cout << " m[" << menorDistancia << "][" << y << "] = " << this->matriz[menorDistancia][y] << endl;
-                // cout << "Maqui: " << m << endl;
-                if (!visitados[y] && this->matriz[menorDistancia][y] > 0 &&
-                    distancias[menorDistancia] + this->matriz[menorDistancia][y] < distancias[y])
-                {
-                    // CAMINHO QUE EU QUERO VAI SAIR DAQUI -> this->matriz[menorDistancia][y]
-                    distancias[y] = distancias[menorDistancia] + this->matriz[menorDistancia][y];
-                    m = max(this->matriz[menorDistancia][y], m);
-                }
-            }
-        }
-        else
-        {
-            x = this->vertices;
-            m = -1;
-        }
-    }
-
-    // cout << "M: " << m << endl;
-
-    return m;
-}
-
-Grafo *Grafo::floydW()
-{
-    Grafo *g2 = new Grafo(this->vertices, this->vertices);
-
-    for (size_t x = 0; x < this->vertices; x++)
-    {
-        for (size_t y = 0; y < this->vertices; y++)
-        {
-            //g2->matriz[x][y]
-            if (x == y)
-            {
-                g2->matriz[x][y];
-            }
-            else
-            {
-                if (this->matriz[x][y] > 0)
-                    g2->matriz[x][y] = this->matriz[x][y];
-                else
-                    g2->matriz[x][y] = infinity;
-            }
-        }
-    }
-
     int m = -1;
     for (size_t x = 0; x < this->vertices; x++)
     {
@@ -306,43 +159,97 @@ Grafo *Grafo::floydW()
         {
             for (size_t z = 0; z < this->vertices; z++)
             {
-                // g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);
-                g2->matriz[y][z] = min(g2->matriz[y][z], g2->matriz[y][x] + g2->matriz[x][z]);
+                this->matriz[y][z] = min(this->matriz[y][z], this->matriz[y][x] + this->matriz[x][z]);
             }
         }
     }
-    //g2->printMatriz();
-
-    return g2;
 }
 
-int Grafo::maiorMenorCaminho()
+/**
+ * Equação de recorrência: 
+ * 
+ *                ---> D(v, 0) + ( d(u,v) - g )*c(u) se c(v) <= c(u) && g <= d(uv)
+ * D(u, g) = min -|
+ *                ---> D(v, U-d(u,v)) + ( U - g )*c(u) se c(v) > c(u) 
+ * Tirada de: https://dl.acm.org/doi/pdf/10.1145/1978782.1978791
+ */
+int menorCustoRec(Grafo *g, int **cache, int *tabelaDePrecosGas, int cidades, int cidade, int gasosa, int tanque)
 {
-    int maiorMenorCaminho = -1;
-    int dm = 0;
+    if (cidade == cidades - 1) // Cheguei ao destino :)
+        gasosa = 0;
 
-    for (size_t x = 0; x < this->vertices; x++)
+    int custo = cache[cidade][gasosa];
+    int menorCusto = infinity;
+
+    if (custo == -1)
     {
-        for (size_t y = x + 1; y < this->vertices - 1; y++)
+        for (int proximaCidade = cidade + 1; proximaCidade < cidades; proximaCidade++)
         {
-            dm = this->djkstraModificado(x, y);
+            custo = infinity;
+            if (g->matriz[cidade][proximaCidade] <= tanque)
+            {
+                if (tabelaDePrecosGas[proximaCidade] > tabelaDePrecosGas[cidade])
+                {
+                    custo = menorCustoRec(g, cache, tabelaDePrecosGas, cidades, proximaCidade,
+                                          (tanque - g->matriz[cidade][proximaCidade]), tanque) + (tanque - gasosa) * tabelaDePrecosGas[cidade];
+                }
+                else
+                {
+                    if (gasosa >= g->matriz[cidade][proximaCidade])
+                    {
+                        custo = menorCustoRec(g, cache, tabelaDePrecosGas, cidades,
+                                              proximaCidade,
+                                              (gasosa - g->matriz[cidade][proximaCidade]), tanque);
+                    }
+                    else
+                    {
+                        custo = menorCustoRec(g, cache, tabelaDePrecosGas, cidades,
+                                              proximaCidade,
+                                              0, tanque) +
+                                (g->matriz[cidade][proximaCidade] - gasosa) * tabelaDePrecosGas[cidade];
+                    }
+                }
 
-            if (dm >= 0)
-                maiorMenorCaminho = max(maiorMenorCaminho, dm);
-            else
-                x = y = this->vertices, maiorMenorCaminho = -1;
-        }
+                if(custo >= 0 && custo < menorCusto) menorCusto = custo;
+                //menorCusto = custo >= 0 ? min(custo, menorCusto) : menorCusto;
+            }
+        } // end for
+    }
+    else
+    {
+        menorCusto = custo;
     }
 
-    return maiorMenorCaminho;
+    cache[cidade][gasosa] = menorCusto;
+
+    return cache[cidade][gasosa];
 }
 
-int menorCusto() {}
+int menorCusto(Grafo *g, int cidades, int tanque, int *tabelaDePrecosGas)
+{
+    // Sim, está um caquinha porém, por motivos de "Sem tempo irmão",
+    // ficará assim msm ;)
+    int **cache = new int *[cidades];
+    for (int x = 0; x < cidades; x++)
+        cache[x] = new int[tanque + 1];
+
+    int custo = 0;
+    cache[cidades - 1][0] = 0;
+
+    custo = menorCustoRec(g, cache, tabelaDePrecosGas, cidades, 0, tanque, tanque);
+
+    for (int y = 0; y < cidades; y++)    
+        delete cache[y];    
+    delete [] cache;
+
+    return custo;
+}
 
 int main()
 {
     int cidades, estradas, tanque;
     int cidadeA, cidadeB, distancia;
+    int m = infinity;
 
     scanf("%d%d%d", &cidades, &estradas, &tanque);
 
@@ -354,33 +261,32 @@ int main()
         }
         else
         {
-
-            Grafo g(cidades, cidades);
-            int tabelaDePrecosGas[cidades];
+            Grafo *g = new Grafo(cidades, cidades);
+            int *tabelaDePrecosGas = new int[cidades];
 
             // Ler estradas e conexoes
             for (size_t x = 0; x < estradas; x++)
             {
                 scanf("%d%d%d", &cidadeA, &cidadeB, &distancia);
-                g.conectarVertices(--cidadeA, --cidadeB, distancia);
+                g->conectarVertices(--cidadeA, --cidadeB, distancia);
             }
 
             // Ler tabela de preços
             for (size_t x = 0; x < cidades; x++)
                 scanf("%d", &tabelaDePrecosGas[x]);
 
-            g.printMatriz();
+            g->floydW();
 
-            /*
-            int menorCaminho = 0;
-
-            // cout << "A: " << maiorCaminho << " B: " << maiorCaminho2 << endl;
-
-            if (menorCaminho < infinity && menorCaminho > 0)
-                printf("%d\n", menorCaminho);
+            if (g->matriz[0][cidades - 1] == infinity)
+            {
+                printf("-1\n");
+            }
             else
-                printf("-1");
-            */
+            {
+                // Se é possível chegar no final...
+                int m = menorCusto(g, cidades, tanque, tabelaDePrecosGas);
+                printf("%d\n", (m == infinity ? -1 : m));
+            }
         }
         scanf("%d %d %d", &cidades, &estradas, &tanque);
     } // end while

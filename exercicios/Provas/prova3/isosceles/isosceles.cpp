@@ -13,13 +13,13 @@ void clonarVetor(int v1[], int v2[], int tamanho)
 void esquerdaParaDireita(int muro[], int muroAux[], int tamanho)
 {
     for (register int x = 1; x <= tamanho; x++)
-        muroAux[x] = (muroAux[x - 1] < muroAux[x]) ? (muroAux[x - 1] + 1) : muroAux[x];            
+        muroAux[x] = (muroAux[x - 1] < muroAux[x]) ? (muroAux[x - 1] + 1) : muroAux[x], cout << muroAux[x] << " ";			
 }
 
 void direitaParaEsquerda(int muro[], int muroAux[], int tamanho)
 {    
     for (register int x = tamanho; x > 0; x--)
-        muroAux[x] = (muroAux[x + 1] < muroAux[x]) ? (muroAux[x + 1] + 1) : muroAux[x];        
+        muroAux[x] = (muroAux[x + 1] < muroAux[x]) ? (muroAux[x + 1] + 1) : muroAux[x], cout << muroAux[x] << " ";
 }
 
 int maiorTriangulo(int muro[], int tamanhoMuro)
@@ -28,8 +28,12 @@ int maiorTriangulo(int muro[], int tamanhoMuro)
     int muroAux[tamanhoMuro+2];
 
     clonarVetor(muro, muroAux, tamanhoMuro);
+	cout << "A: ";
     esquerdaParaDireita(muro, muroAux, tamanhoMuro);
+	cout << endl;
+	cout << "B: ";
     direitaParaEsquerda(muro, muroAux, tamanhoMuro);
+	cout << endl;
 
     for (register int x = 0; x < tamanhoMuro; x++)    
         maior = max(muroAux[x], maior);

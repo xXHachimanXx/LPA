@@ -1,0 +1,1 @@
+g++ max.cpp -o max -DDEBUG && ./max < in.txt > out.txt
